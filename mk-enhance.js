@@ -333,8 +333,8 @@
         '<path class="mk-fill" d="M34 22 L24 33 L42 22 Z"/>' +
       '</g></g>';
 
-    var svg =
-      '<svg viewBox="0 0 1200 150" role="img" aria-label="Trasa multimodalna: pojazd zmienia sie z ciezarowki w kontener i samolot">' +
+    var desktopSvg =
+      '<svg class="mk-journey-desktop" viewBox="0 0 1200 150" role="img" aria-label="Trasa multimodalna: pojazd zmienia sie z ciezarowki w statek kontenerowy i samolot">' +
         '<path id="mkRoute" class="mk-route" d="M60 100 L1140 100"/>' +
         '<circle class="mk-node" cx="200" cy="100" r="6"/>' +
         '<circle class="mk-node" cx="600" cy="100" r="6"/>' +
@@ -350,9 +350,27 @@
         '</g>' +
       '</svg>';
 
+    // Osobny, czytelniejszy wariant na telefon: wieksze ikony i krotsze etykiety.
+    var mobileSvg =
+      '<svg class="mk-journey-mobile" viewBox="0 0 360 220" role="img" aria-label="Trasa multimodalna na telefonie: drogowy, morski i lotniczy">' +
+        '<path id="mkRouteMobile" class="mk-route" d="M30 120 L330 120"/>' +
+        '<circle class="mk-node" cx="70" cy="120" r="6"/>' +
+        '<circle class="mk-node" cx="180" cy="120" r="6"/>' +
+        '<circle class="mk-node" cx="290" cy="120" r="6"/>' +
+        '<text class="mk-lbl" x="70" y="166">DROGOWY</text>' +
+        '<text class="mk-lbl" x="180" y="166">MORSKI</text>' +
+        '<text class="mk-lbl" x="290" y="166">LOTNICZY</text>' +
+        '<g class="mk-vehicle">' +
+          '<animateMotion dur="9s" repeatCount="indefinite" calcMode="linear">' +
+            '<mpath href="#mkRouteMobile"/>' +
+          '</animateMotion>' +
+          truck + container + plane +
+        '</g>' +
+      '</svg>';
+
     var wrap = document.createElement('div');
     wrap.className = 'mk-journey';
-    wrap.innerHTML = '<p class="mk-jcap">USŁUGI TRANSPORTOWE · DROGOWY → MORSKI → LOTNICZY</p>' + svg;
+    wrap.innerHTML = '<p class="mk-jcap">USŁUGI TRANSPORTOWE · DROGOWY → MORSKI → LOTNICZY</p>' + desktopSvg + mobileSvg;
     shell.insertBefore(wrap, list);
   }
 
