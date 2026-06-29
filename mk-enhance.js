@@ -382,11 +382,16 @@
       var pf = shell.querySelector('iframe'); if (!pf) return null;
       var md; try { md = pf.contentDocument; } catch (e) { return null; }
       if (!md) return null;
-      var f3 = md.getElementById('frame3d'); if (!f3) return null;
-      var f3d; try { f3d = f3.contentDocument; } catch (e) { return null; }
-      if (!f3d) return null;
-      var cv = f3d.querySelector('canvas'); if (!cv) return null;
-      return { pf: pf, md: md, f3: f3, win3: f3.contentWindow, f3d: f3d, cv: cv };
+      var f3 = md.getElementById('frame3d');
+      if (f3) {
+        var f3d; try { f3d = f3.contentDocument; } catch (e) { return null; }
+        if (!f3d) return null;
+        var nestedCanvas = f3d.querySelector('canvas'); if (!nestedCanvas) return null;
+        return { pf: pf, md: md, f3: f3, win3: f3.contentWindow, f3d: f3d, cv: nestedCanvas };
+      }
+      // Publiczna wersja magazynu jest bezpośrednim dokumentem 3D, bez iframe frame3d.
+      var directCanvas = md.querySelector('canvas'); if (!directCanvas) return null;
+      return { pf: pf, md: md, f3: pf, win3: pf.contentWindow, f3d: md, cv: directCanvas };
     }
 
     function waitForCanvas(tries) {
