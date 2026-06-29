@@ -242,6 +242,18 @@ body::before{display:none !important}
 /* ---------- responsive / a11y ---------- */
 @media (max-width:1100px){#mk-rail{display:none}}
 @media (hover:none),(pointer:coarse){#mk-glow,#mk-ring{display:none!important}}
+@media (max-width:820px){
+  #mk-glow,#mk-ring{display:none!important}
+  .site-header .brand img{width:min(220px,calc(100vw - 108px))!important}
+  .digital-step.reveal{transform:translateY(28px) scale(.98)}
+  .services .service-list{width:calc(100% + 32px);margin-left:-16px;margin-right:-16px}
+  .services .service-row{padding-left:16px;padding-right:16px}
+  .experience.mk-wh .stage-shell{transform:scale(1.28);transform-origin:center 55%}
+  .experience .experience-heading h2{font-size:clamp(48px,14vw,58px)!important}
+}
+@media (max-width:520px){
+  .site-header .brand img{width:min(200px,calc(100vw - 96px))!important}
+}
 @media (prefers-reduced-motion:reduce){
   .mk-aurora{display:none}
   #mk-loader{display:none}
