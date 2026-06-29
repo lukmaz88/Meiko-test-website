@@ -417,15 +417,7 @@
 
       startOrbit(c);
 
-      // przycisk: pelny interaktywny widok 3D w nowej karcie (niezawodne)
-      if (!section.querySelector('.mk-3d-enter')) {
-        var enter = document.createElement('button');
-        enter.type = 'button';
-        enter.className = 'mk-3d-enter';
-        enter.innerHTML = 'Przejdź do widoku 3D <span>↗</span>';
-        enter.addEventListener('click', function () { window.open('./magazyn.html', '_blank', 'noopener'); });
-        section.appendChild(enter);
-      }
+      // Widok regałów pozostaje osadzony w portfolio; bez odsyłacza do osobnej strony magazynu.
     }
 
     function startOrbit(c) {
