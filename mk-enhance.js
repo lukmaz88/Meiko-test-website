@@ -45,10 +45,11 @@
           '<span class="mk-load-pulse"></span>' +
           '<img class="mk-load-mark" src="./assets/mk-icon.png" alt="MEIKO" />' +
         '</div>' +
-        '<p class="mk-eyebrow">LOGISTICS EXPERIENCE · GLIWICE</p>' +
+        '<p class="mk-eyebrow">LOGISTYKA · MAGAZYNOWANIE · TECHNOLOGIA</p>' +
         '<h1 class="mk-title">' + letters + '</h1>' +
+        '<p class="mk-loader-claim">NIEZAWODNA LOGISTYKA DLA TWOJEGO BIZNESU</p>' +
         '<div class="mk-bar"><div class="mk-fill"></div></div>' +
-        '<div class="mk-meta"><span>PRZYGOTOWUJĘ DOŚWIADCZENIE</span>' +
+        '<div class="mk-meta"><span>PRZYGOTOWUJEMY ROZWIĄZANIA, KTÓRE NAPĘDZAJĄ TWÓJ BIZNES</span>' +
         '<span class="mk-count">0%</span></div>' +
       '</div>';
 
