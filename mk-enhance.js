@@ -9,6 +9,13 @@
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var fine = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 
+  /* Preloader text follows the language saved by the React app (default PL) */
+  var MK_LANG = (function () { try { return localStorage.getItem('mk-lang') === 'en' ? 'en' : 'pl'; } catch (e) { return 'pl'; } })();
+  var MK_TXT = {
+    pl: { eyebrow: 'LOGISTYKA · MAGAZYNOWANIE · TECHNOLOGIA', claim: 'NIEZAWODNA LOGISTYKA DLA TWOJEGO BIZNESU', meta: 'PRZYGOTOWUJEMY ROZWIĄZANIA, KTÓRE NAPĘDZAJĄ TWÓJ BIZNES' },
+    en: { eyebrow: 'LOGISTICS · WAREHOUSING · TECHNOLOGY', claim: 'RELIABLE LOGISTICS FOR YOUR BUSINESS', meta: 'PREPARING SOLUTIONS THAT POWER YOUR BUSINESS' }
+  }[MK_LANG];
+
   /* ---------------- 1. PRELOADER ---------------- */
   function buildLoader() {
     if (reduce) return;
@@ -45,11 +52,11 @@
           '<span class="mk-load-pulse"></span>' +
           '<img class="mk-load-mark" src="./assets/mk-icon.png" alt="MEIKO" />' +
         '</div>' +
-        '<p class="mk-eyebrow">LOGISTYKA · MAGAZYNOWANIE · TECHNOLOGIA</p>' +
+        '<p class="mk-eyebrow">' + MK_TXT.eyebrow + '</p>' +
         '<h1 class="mk-title">' + letters + '</h1>' +
-        '<p class="mk-loader-claim">NIEZAWODNA LOGISTYKA DLA TWOJEGO BIZNESU</p>' +
+        '<p class="mk-loader-claim">' + MK_TXT.claim + '</p>' +
         '<div class="mk-bar"><div class="mk-fill"></div></div>' +
-        '<div class="mk-meta"><span>PRZYGOTOWUJEMY ROZWIĄZANIA, KTÓRE NAPĘDZAJĄ TWÓJ BIZNES</span>' +
+        '<div class="mk-meta"><span>' + MK_TXT.meta + '</span>' +
         '<span class="mk-count">0%</span></div>' +
       '</div>';
 
