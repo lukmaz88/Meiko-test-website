@@ -357,20 +357,16 @@
 
     // Osobny, czytelniejszy wariant na telefon: wieksze ikony i krotsze etykiety.
     var mobileSvg =
-      '<svg class="mk-journey-mobile" viewBox="0 0 360 220" role="img" aria-label="Trasa multimodalna na telefonie: drogowy, morski i lotniczy">' +
-        '<path id="mkRouteMobile" class="mk-route" d="M30 120 L330 120"/>' +
-        '<circle class="mk-node" cx="70" cy="120" r="6"/>' +
-        '<circle class="mk-node" cx="180" cy="120" r="6"/>' +
-        '<circle class="mk-node" cx="290" cy="120" r="6"/>' +
-        '<text class="mk-lbl" x="70" y="166">DROGOWY</text>' +
-        '<text class="mk-lbl" x="180" y="166">MORSKI</text>' +
-        '<text class="mk-lbl" x="290" y="166">LOTNICZY</text>' +
-        '<g class="mk-vehicle">' +
-          '<animateMotion dur="9s" repeatCount="indefinite" calcMode="linear">' +
-            '<mpath href="#mkRouteMobile"/>' +
-          '</animateMotion>' +
+      '<svg class="mk-journey-mobile" viewBox="0 0 360 210" role="img" aria-label="Zmiana transportu na telefonie: ciezarowka, statek kontenerowy i samolot">' +
+        '<g class="mk-mobile-vehicle" transform="translate(180 108) scale(1.35)">' +
           truck + container + plane +
         '</g>' +
+        '<text class="mk-mobile-name mk-mobile-road" x="180" y="158">TRANSPORT DROGOWY</text>' +
+        '<text class="mk-mobile-name mk-mobile-sea" x="180" y="158">TRANSPORT MORSKI</text>' +
+        '<text class="mk-mobile-name mk-mobile-air" x="180" y="158">TRANSPORT LOTNICZY</text>' +
+        '<circle class="mk-mobile-dot mk-mobile-road" cx="164" cy="184" r="4"/>' +
+        '<circle class="mk-mobile-dot mk-mobile-sea" cx="180" cy="184" r="4"/>' +
+        '<circle class="mk-mobile-dot mk-mobile-air" cx="196" cy="184" r="4"/>' +
       '</svg>';
 
     var wrap = document.createElement('div');
