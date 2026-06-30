@@ -77,39 +77,6 @@
     requestAnimationFrame(step);
   }
 
-  /* ---------------- 2. CUSTOM CURSOR ---------------- */
-  function initCursor() {
-    if (!fine) return;
-    var glow = document.createElement('div'); glow.id = 'mk-glow';
-    var ring = document.createElement('div'); ring.id = 'mk-ring';
-    document.body.appendChild(glow); document.body.appendChild(ring);
-    document.body.classList.add('mk-cursor-on');
-
-    var tx = window.innerWidth / 2, ty = window.innerHeight / 2;
-    var gx = tx, gy = ty, rx = tx, ry = ty;
-
-    window.addEventListener('mousemove', function (e) {
-      tx = e.clientX; ty = e.clientY;
-      ring.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
-    }, { passive: true });
-
-    (function loop() {
-      gx += (tx - gx) * 0.12; gy += (ty - gy) * 0.12;
-      glow.style.transform = 'translate(' + gx + 'px,' + gy + 'px)';
-      requestAnimationFrame(loop);
-    })();
-
-    var hoverSel = 'a,button,[data-mk-mag],.story-hotspot,input[type=range],.mk-dot,.history-ticks button,.story-footer nav button';
-    document.addEventListener('mouseover', function (e) {
-      if (e.target.closest && e.target.closest(hoverSel)) ring.classList.add('mk-hover');
-    });
-    document.addEventListener('mouseout', function (e) {
-      if (e.target.closest && e.target.closest(hoverSel)) ring.classList.remove('mk-hover');
-    });
-    window.addEventListener('mousedown', function () { ring.classList.add('mk-press'); });
-    window.addEventListener('mouseup', function () { ring.classList.remove('mk-press'); });
-  }
-
   /* ---------------- 3. SCROLL PROGRESS + RAIL ---------------- */
   function initScroll() {
     var bar = document.createElement('div'); bar.id = 'mk-scroll';
@@ -606,7 +573,6 @@
     if (!root || !root.children.length) {
       if (tries < 40) return setTimeout(function () { enhance(tries + 1); }, 80);
     }
-    try { initCursor(); } catch (e) {}
     try { initScroll(); } catch (e) {}
     try { initMagnetic(); } catch (e) {}
     try { initReveal(); } catch (e) {}
