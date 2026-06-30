@@ -90,10 +90,11 @@
     var bar = document.createElement('div'); bar.id = 'mk-scroll';
     document.body.appendChild(bar);
 
+    // [id, label PL, label EN]
     var sections = [
-      ['top', 'Intro'], ['about', 'O firmie'], ['services', 'Usługi'],
-      ['warehouses', 'Magazyny'], ['standards', 'Standardy'],
-      ['experience', 'Jak działamy'], ['contact', 'Kontakt']
+      ['top', 'Intro', 'Intro'], ['about', 'O firmie', 'About'], ['services', 'Usługi', 'Services'],
+      ['warehouses', 'Magazyny', 'Warehouses'], ['standards', 'Standardy', 'Standards'],
+      ['experience', 'Jak działamy', 'How we work'], ['faq', 'FAQ', 'FAQ'], ['contact', 'Kontakt', 'Contact']
     ].filter(function (s) { return document.getElementById(s[0]); });
 
     var rail = null, dots = [];
@@ -102,14 +103,21 @@
       sections.forEach(function (s) {
         var b = document.createElement('button');
         b.className = 'mk-dot';
-        b.innerHTML = '<span class="mk-lbl">' + s[1] + '</span><span class="mk-bullet"></span>';
+        var lbl = (MK_LANG === 'en') ? s[2] : s[1];
+        b.innerHTML = '<span class="mk-lbl">' + lbl + '</span><span class="mk-bullet"></span>';
         b.addEventListener('click', function () {
           var t = document.getElementById(s[0]);
           if (t) t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
         });
-        rail.appendChild(b); dots.push({ id: s[0], el: b });
+        rail.appendChild(b);
+        dots.push({ id: s[0], el: b, sect: s, lblEl: b.querySelector('.mk-lbl') });
       });
       document.body.appendChild(rail);
+      // React powiadamia o zmianie jezyka -> aktualizujemy etykiety raila na zywo
+      window.addEventListener('mk-langchange', function (e) {
+        var en = e && e.detail === 'en';
+        dots.forEach(function (d) { d.lblEl.textContent = en ? d.sect[2] : d.sect[1]; });
+      });
     }
 
     function onScroll() {
