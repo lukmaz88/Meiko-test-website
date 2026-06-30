@@ -347,10 +347,7 @@
         '<text class="mk-lbl" x="200" y="132">TRANSPORT DROGOWY</text>' +
         '<text class="mk-lbl" x="600" y="132">TRANSPORT MORSKI</text>' +
         '<text class="mk-lbl" x="1000" y="132">TRANSPORT LOTNICZY</text>' +
-        '<g class="mk-vehicle">' +
-          '<animateMotion dur="9s" repeatCount="indefinite" calcMode="linear">' +
-            '<mpath href="#mkRoute"/>' +
-          '</animateMotion>' +
+        '<g class="mk-vehicle" data-x1="60" data-x2="1140" data-y="100">' +
           truck + container + plane +
         '</g>' +
       '</svg>';
@@ -365,8 +362,7 @@
         '<text class="mk-lbl" x="70" y="166">DROGOWY</text>' +
         '<text class="mk-lbl" x="180" y="166">MORSKI</text>' +
         '<text class="mk-lbl" x="290" y="166">LOTNICZY</text>' +
-        '<g class="mk-vehicle mk-mobile-runner">' +
-          '<animateMotion dur="12s" repeatCount="indefinite" calcMode="linear" path="M30 120 L330 120"/>' +
+        '<g class="mk-vehicle mk-mobile-runner" data-x1="30" data-x2="330" data-y="120">' +
           truck + container + plane +
         '</g>' +
       '</svg>';
@@ -375,6 +371,62 @@
     wrap.className = 'mk-journey';
     wrap.innerHTML = '<p class="mk-jcap">USŁUGI TRANSPORTOWE · DROGOWY → MORSKI → LOTNICZY</p>' + desktopSvg + mobileSvg;
     shell.insertBefore(wrap, list);
+
+    // Jeden zegar steruje jednoczesnie pozycja i zmiana srodka transportu.
+    // Dzieki temu SVG na telefonie i komputerze nie rozjezdza sie w czasie.
+    var runners = wrap.querySelectorAll('.mk-vehicle');
+    var startedAt = performance.now();
+    var duration = 12000;
+
+    function smooth(value) {
+      value = Math.max(0, Math.min(1, value));
+      return value * value * (3 - 2 * value);
+    }
+
+    function setState(runner, truckWeight, shipWeight, planeWeight) {
+      var nodes = [
+        [runner.querySelector('.mk-veh-truck'), truckWeight],
+        [runner.querySelector('.mk-veh-cont'), shipWeight],
+        [runner.querySelector('.mk-veh-plane'), planeWeight]
+      ];
+      nodes.forEach(function (item) {
+        if (!item[0]) return;
+        item[0].style.opacity = item[1].toFixed(3);
+        item[0].style.transform = 'scale(' + (0.55 + item[1] * 0.45).toFixed(3) + ')';
+      });
+    }
+
+    function animate(now) {
+      var progress = ((now - startedAt) % duration) / duration;
+      var truckWeight = 0, shipWeight = 0, planeWeight = 0;
+
+      if (progress < .29) truckWeight = 1;
+      else if (progress < .34) {
+        var toShip = smooth((progress - .29) / .05);
+        truckWeight = 1 - toShip;
+        shipWeight = toShip;
+      } else if (progress < .66) shipWeight = 1;
+      else if (progress < .71) {
+        var toPlane = smooth((progress - .66) / .05);
+        shipWeight = 1 - toPlane;
+        planeWeight = toPlane;
+      } else planeWeight = 1;
+
+      var envelope = progress < .025 ? smooth(progress / .025) :
+        (progress > .975 ? smooth((1 - progress) / .025) : 1);
+
+      runners.forEach(function (runner) {
+        var x1 = Number(runner.getAttribute('data-x1'));
+        var x2 = Number(runner.getAttribute('data-x2'));
+        var y = Number(runner.getAttribute('data-y'));
+        runner.setAttribute('transform', 'translate(' + (x1 + (x2 - x1) * progress).toFixed(2) + ' ' + y + ')');
+        runner.style.opacity = envelope.toFixed(3);
+        setState(runner, truckWeight, shipWeight, planeWeight);
+      });
+
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
   }
 
   /* ---------------- 10. MODEL 3D JAKO ZYWE TLO ---------------- */
