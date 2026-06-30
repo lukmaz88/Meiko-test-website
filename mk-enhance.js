@@ -276,7 +276,7 @@
     targets.forEach(function (t) { io.observe(t); });
   }
 
-  /* ---------------- 9. TRASA MULTIMODALNA (truck -> kontener -> samolot) ---------------- */
+  /* ---------------- 9. TRASA MULTIMODALNA (truck -> train -> ship -> plane) ---------------- */
   function initJourney() {
     if (reduce) return;
     var shell = document.querySelector('.services .page-shell');
@@ -290,6 +290,18 @@
         '<path class="mk-icon" d="M28 12 h7 l6 6 v6 h-13 z"/>' +
         '<circle class="mk-fill" cx="8" cy="26" r="3.2"/>' +
         '<circle class="mk-fill" cx="34" cy="26" r="3.2"/>' +
+      '</g></g>';
+    // lokomotywa z jednym wagonem porusza sie jako jeden zestaw
+    var train =
+      '<g transform="translate(-39,-45)"><g class="mk-veh mk-veh-train">' +
+        '<rect class="mk-icon" x="0" y="10" width="28" height="16" rx="1.5"/>' +
+        '<path class="mk-icon" d="M28 22 H33 M7 10 V26 M18 10 V26"/>' +
+        '<rect class="mk-icon" x="33" y="13" width="20" height="13" rx="2"/>' +
+        '<path class="mk-icon" d="M53 10 H68 L77 16 V26 H53 Z M60 10 V5 H68 V10"/>' +
+        '<circle class="mk-fill" cx="7" cy="29" r="3"/>' +
+        '<circle class="mk-fill" cx="21" cy="29" r="3"/>' +
+        '<circle class="mk-fill" cx="41" cy="29" r="3"/>' +
+        '<circle class="mk-fill" cx="64" cy="29" r="3"/>' +
       '</g></g>';
     // statek kontenerowiec (kadlub + stosy kontenerow), plynie w prawo
     var container =
@@ -309,21 +321,25 @@
       '</g></g>';
 
     var desktopSvg =
-      '<svg class="mk-journey-desktop" viewBox="0 0 1200 150" role="img" aria-label="Trasa multimodalna: pojazd zmienia sie z ciezarowki w statek kontenerowy i samolot">' +
+      '<svg class="mk-journey-desktop" viewBox="0 0 1200 150" role="img" aria-label="Trasa multimodalna: transport drogowy, kolejowy, morski i lotniczy">' +
         '<defs><linearGradient id="mkWaterGradient" x1="0" y1="0" x2="0" y2="1">' +
           '<stop offset="0" stop-color="#eefbff" stop-opacity=".72"/>' +
           '<stop offset=".5" stop-color="#8bd8ef" stop-opacity=".45"/>' +
           '<stop offset="1" stop-color="#2695c4" stop-opacity=".25"/>' +
         '</linearGradient></defs>' +
         '<g class="mk-road-scene">' +
-          '<path class="mk-road-bed" d="M60 100 H400"/>' +
-          '<path class="mk-road-dashes" d="M75 100 H390"/>' +
+          '<path class="mk-road-bed" d="M60 100 H330"/>' +
+          '<path class="mk-road-dashes" d="M75 100 H320"/>' +
+        '</g>' +
+        '<g class="mk-rail-scene">' +
+          '<path class="mk-rail-line" d="M330 94 H600 M330 106 H600"/>' +
+          '<path class="mk-rail-ties" d="M340 89 V111 M360 89 V111 M380 89 V111 M400 89 V111 M420 89 V111 M440 89 V111 M460 89 V111 M480 89 V111 M500 89 V111 M520 89 V111 M540 89 V111 M560 89 V111 M580 89 V111"/>' +
         '</g>' +
         '<g class="mk-water-scene">' +
-          '<rect class="mk-water-bed" x="400" y="88" width="400" height="24" rx="8"/>' +
-          '<path class="mk-wave mk-wave-a" d="M400 94 Q420 88 440 94 T480 94 T520 94 T560 94 T600 94 T640 94 T680 94 T720 94 T760 94 T800 94"/>' +
-          '<path class="mk-wave mk-wave-b" d="M400 104 Q420 98 440 104 T480 104 T520 104 T560 104 T600 104 T640 104 T680 104 T720 104 T760 104 T800 104"/>' +
-          '<path class="mk-wave mk-wave-c" d="M400 111 Q420 106 440 111 T480 111 T520 111 T560 111 T600 111 T640 111 T680 111 T720 111 T760 111 T800 111"/>' +
+          '<rect class="mk-water-bed" x="600" y="88" width="270" height="24" rx="8"/>' +
+          '<path class="mk-wave mk-wave-a" d="M600 94 Q620 88 640 94 T680 94 T720 94 T760 94 T800 94 T840 94 T880 94"/>' +
+          '<path class="mk-wave mk-wave-b" d="M600 104 Q620 98 640 104 T680 104 T720 104 T760 104 T800 104 T840 104 T880 104"/>' +
+          '<path class="mk-wave mk-wave-c" d="M600 111 Q620 106 640 111 T680 111 T720 111 T760 111 T800 111 T840 111 T880 111"/>' +
         '</g>' +
         '<g class="mk-cloud-part mk-cloud-left">' +
           '<path d="M925 92 C925 81 934 75 945 77 C947 64 959 59 970 67 L970 92 Z"/>' +
@@ -332,35 +348,44 @@
           '<path d="M970 67 C980 61 992 68 993 78 C1005 77 1014 84 1014 92 L970 92 Z"/>' +
         '</g>' +
         '<path id="mkRoute" class="mk-route" d="M60 100 L1140 100"/>' +
-        '<circle class="mk-node" cx="200" cy="100" r="6"/>' +
-        '<circle class="mk-node" cx="600" cy="100" r="6"/>' +
-        '<circle class="mk-node" cx="1000" cy="100" r="6"/>' +
-        '<text class="mk-lbl" x="200" y="132">TRANSPORT DROGOWY</text>' +
-        '<text class="mk-lbl" x="600" y="132">TRANSPORT MORSKI</text>' +
-        '<text class="mk-lbl" x="1000" y="132">TRANSPORT LOTNICZY</text>' +
+        '<circle class="mk-node" cx="195" cy="100" r="6"/>' +
+        '<circle class="mk-node" cx="465" cy="100" r="6"/>' +
+        '<circle class="mk-node" cx="735" cy="100" r="6"/>' +
+        '<circle class="mk-node" cx="1010" cy="100" r="6"/>' +
+        '<text class="mk-lbl" x="195" y="132">TRANSPORT DROGOWY</text>' +
+        '<text class="mk-lbl" x="465" y="132">TRANSPORT KOLEJOWY</text>' +
+        '<text class="mk-lbl" x="735" y="132">TRANSPORT MORSKI</text>' +
+        '<text class="mk-lbl" x="1010" y="132">TRANSPORT LOTNICZY</text>' +
         '<g class="mk-vehicle" data-x1="60" data-x2="1140" data-y="100">' +
-          truck + container + plane +
+          truck + train + container + plane +
         '</g>' +
       '</svg>';
 
     // Osobny, czytelniejszy wariant na telefon: wieksze ikony i krotsze etykiety.
     var mobileSvg =
-      '<svg class="mk-journey-mobile" viewBox="0 0 360 220" role="img" aria-label="Trasa multimodalna na telefonie: drogowy, morski i lotniczy">' +
+      '<svg class="mk-journey-mobile" viewBox="0 0 360 220" role="img" aria-label="Trasa multimodalna na telefonie: drogowy, kolejowy, morski i lotniczy">' +
+        '<path class="mk-road-bed" d="M25 120 H105"/>' +
+        '<path class="mk-road-dashes" d="M30 120 H100"/>' +
+        '<g class="mk-rail-scene"><path class="mk-rail-line" d="M105 114 H185 M105 126 H185"/><path class="mk-rail-ties" d="M112 109 V131 M126 109 V131 M140 109 V131 M154 109 V131 M168 109 V131 M182 109 V131"/></g>' +
+        '<rect class="mk-water-bed" x="185" y="108" width="80" height="24" rx="7"/>' +
+        '<path class="mk-wave" d="M185 116 Q195 111 205 116 T225 116 T245 116 T265 116"/>' +
         '<path class="mk-route" d="M30 120 L330 120"/>' +
-        '<circle class="mk-node" cx="70" cy="120" r="6"/>' +
-        '<circle class="mk-node" cx="180" cy="120" r="6"/>' +
-        '<circle class="mk-node" cx="290" cy="120" r="6"/>' +
-        '<text class="mk-lbl" x="70" y="166">DROGOWY</text>' +
-        '<text class="mk-lbl" x="180" y="166">MORSKI</text>' +
-        '<text class="mk-lbl" x="290" y="166">LOTNICZY</text>' +
+        '<circle class="mk-node" cx="65" cy="120" r="5"/>' +
+        '<circle class="mk-node" cx="145" cy="120" r="5"/>' +
+        '<circle class="mk-node" cx="225" cy="120" r="5"/>' +
+        '<circle class="mk-node" cx="305" cy="120" r="5"/>' +
+        '<text class="mk-lbl" x="65" y="166">DROGOWY</text>' +
+        '<text class="mk-lbl" x="145" y="166">KOLEJOWY</text>' +
+        '<text class="mk-lbl" x="225" y="166">MORSKI</text>' +
+        '<text class="mk-lbl" x="305" y="166">LOTNICZY</text>' +
         '<g class="mk-vehicle mk-mobile-runner" data-x1="30" data-x2="330" data-y="120">' +
-          truck + container + plane +
+          truck + train + container + plane +
         '</g>' +
       '</svg>';
 
     var wrap = document.createElement('div');
     wrap.className = 'mk-journey';
-    wrap.innerHTML = '<p class="mk-jcap">USŁUGI TRANSPORTOWE · DROGOWY → MORSKI → LOTNICZY</p>' + desktopSvg + mobileSvg;
+    wrap.innerHTML = '<p class="mk-jcap">USŁUGI TRANSPORTOWE · DROGOWY → KOLEJOWY → MORSKI → LOTNICZY</p>' + desktopSvg + mobileSvg;
     shell.insertBefore(wrap, list);
 
     // Jeden zegar steruje jednoczesnie pozycja i zmiana srodka transportu.
@@ -369,16 +394,17 @@
     var cloudLeft = wrap.querySelector('.mk-cloud-left');
     var cloudRight = wrap.querySelector('.mk-cloud-right');
     var startedAt = performance.now();
-    var duration = 14000;
+    var duration = 16000;
 
     function smooth(value) {
       value = Math.max(0, Math.min(1, value));
       return value * value * (3 - 2 * value);
     }
 
-    function setState(runner, truckWeight, shipWeight, planeWeight) {
+    function setState(runner, truckWeight, trainWeight, shipWeight, planeWeight) {
       var nodes = [
         [runner.querySelector('.mk-veh-truck'), truckWeight],
+        [runner.querySelector('.mk-veh-train'), trainWeight],
         [runner.querySelector('.mk-veh-cont'), shipWeight],
         [runner.querySelector('.mk-veh-plane'), planeWeight]
       ];
@@ -394,17 +420,22 @@
       var travelEnd = .88;
       var progress = cycle < travelEnd ? cycle / travelEnd : 1;
       var resetHidden = cycle >= .98;
-      var truckWeight = 0, shipWeight = 0, planeWeight = 0;
+      var truckWeight = 0, trainWeight = 0, shipWeight = 0, planeWeight = 0;
 
       if (resetHidden) truckWeight = 1;
-      else if (progress < .27) truckWeight = 1;
-      else if (progress < .36) {
-        var toShip = smooth((progress - .27) / .09);
-        truckWeight = 1 - toShip;
+      else if (progress < .19) truckWeight = 1;
+      else if (progress < .25) {
+        var toTrain = smooth((progress - .19) / .06);
+        truckWeight = 1 - toTrain;
+        trainWeight = toTrain;
+      } else if (progress < .44) trainWeight = 1;
+      else if (progress < .50) {
+        var toShip = smooth((progress - .44) / .06);
+        trainWeight = 1 - toShip;
         shipWeight = toShip;
-      } else if (progress < .63) shipWeight = 1;
-      else if (progress < .72) {
-        var toPlane = smooth((progress - .63) / .09);
+      } else if (progress < .69) shipWeight = 1;
+      else if (progress < .75) {
+        var toPlane = smooth((progress - .69) / .06);
         shipWeight = 1 - toPlane;
         planeWeight = toPlane;
       } else planeWeight = 1;
@@ -422,7 +453,7 @@
         var position = resetHidden ? 0 : progress;
         runner.setAttribute('transform', 'translate(' + (x1 + (x2 - x1) * position).toFixed(2) + ' ' + y + ')');
         runner.style.opacity = envelope.toFixed(3);
-        setState(runner, truckWeight, shipWeight, planeWeight);
+        setState(runner, truckWeight, trainWeight, shipWeight, planeWeight);
       });
 
       var cloudBreak = resetHidden ? 0 : smooth((progress - .83) / .07);
