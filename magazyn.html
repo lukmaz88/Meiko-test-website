@@ -668,6 +668,7 @@ let lastBaseBox = null;        // bbox regałów ostatniego magazynu (do re-spaw
 let lastSceneBox = null;        // bbox całej sceny
 let warehouseShell = null;      // dach i sciany hali otaczajace regaly Gaudi
 let warehouseReveal = 1;        // 0 = pelna hala, 1 = same regaly
+let warehouseDemoPallets = null; // lekkie instancje wypelniajace regaly podczas scrollowania
 let followAgent = null;
 let followAgentKey = null;
 let followAgentHint = null;
@@ -1667,6 +1668,10 @@ function buildRack(rk, originX, originZ){
       });
     });
   });
+
+  // Zachowujemy geometryczne pozycje pustych gniazd bez danych operacyjnych.
+  // Po zbudowaniu całej hali zostaną połączone w kilka wspólnych InstancedMesh.
+  g.userData.demoSlots = emptySlots.map(slot=>({ ...slot }));
 
   if(emptySlots.length){
     const emptyMat = new THREE.MeshStandardMaterial({
@@ -3394,6 +3399,91 @@ function shellEase(value){
   return t*t*(3-2*t);
 }
 
+function demoVisibleCount(ranks, limit){
+  let lo = 0, hi = ranks.length;
+  while(lo < hi){
+    const mid = (lo + hi) >> 1;
+    if(ranks[mid] < limit) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+function applyWarehouseDemoFill(progress){
+  if(!warehouseDemoPallets) return;
+  // Pierwsze palety pojawiają się po rozpoczęciu odkrywania hali,
+  // a pełne obłożenie jest osiągane dopiero tuż przed końcem animacji.
+  const fill = shellEase((progress - 0.14) / 0.84);
+  const visible = Math.max(0, Math.min(warehouseDemoPallets.userData.total,
+    Math.round(warehouseDemoPallets.userData.total * fill)));
+  warehouseDemoPallets.userData.baseMesh.count = visible;
+  warehouseDemoPallets.userData.colorMeshes.forEach(entry=>{
+    entry.mesh.count = demoVisibleCount(entry.ranks, visible);
+  });
+  warehouseDemoPallets.visible = visible > 0;
+}
+
+function buildWarehouseDemoPallets(name, root){
+  if(name !== 'Gaudi') return null;
+  const slots = [];
+  root.children.forEach(rack=>{
+    const localSlots = rack.userData.demoSlots || [];
+    if(!localSlots.length) return;
+    rack.updateMatrix();
+    localSlots.forEach(slot=>{
+      const p = new THREE.Vector3(slot.x, slot.y, slot.z).applyMatrix4(rack.matrix);
+      // Stabilny pseudolosowy klucz: efekt wygląda losowo, ale nie zmienia się po cofnięciu scrolla.
+      const seed = Math.sin(p.x*12.9898 + p.y*37.719 + p.z*78.233) * 43758.5453;
+      slots.push({ x:p.x, y:p.y, z:p.z, w:slot.w, rotY:rack.rotation.y, key:seed-Math.floor(seed) });
+    });
+  });
+  slots.sort((a,b)=>a.key-b.key);
+  if(!slots.length) return null;
+
+  const group = new THREE.Group();
+  group.name = 'gaudiDemoPalletFill';
+  const unitGeo = new THREE.BoxGeometry(1,1,1);
+  const baseMat = new THREE.MeshStandardMaterial({color:0x9a6a38,roughness:0.88,metalness:0.01});
+  const baseMesh = new THREE.InstancedMesh(unitGeo,baseMat,slots.length);
+  baseMesh.frustumCulled = false;
+
+  const palette = [0xd97706,0x2563eb,0x16a34a,0xdc2626];
+  const colorItems = palette.map(()=>[]);
+  slots.forEach((slot,rank)=>colorItems[rank % palette.length].push({slot,rank}));
+
+  slots.forEach((slot,idx)=>{
+    _instObj.position.set(slot.x,slot.y-0.34,slot.z);
+    _instObj.rotation.set(0,slot.rotY,0);
+    _instObj.scale.set(slot.w*0.94,0.12,DEPTH*0.72);
+    _instObj.updateMatrix();
+    baseMesh.setMatrixAt(idx,_instObj.matrix);
+  });
+  baseMesh.instanceMatrix.needsUpdate = true;
+  baseMesh.count = 0;
+  group.add(baseMesh);
+
+  const colorMeshes = colorItems.map((items,colorIdx)=>{
+    const mat = new THREE.MeshStandardMaterial({color:palette[colorIdx],roughness:0.7,metalness:0.025});
+    const mesh = new THREE.InstancedMesh(unitGeo,mat,items.length);
+    mesh.frustumCulled = false;
+    items.forEach((item,idx)=>{
+      const slot = item.slot;
+      _instObj.position.set(slot.x,slot.y+0.03,slot.z);
+      _instObj.rotation.set(0,slot.rotY,0);
+      _instObj.scale.set(slot.w*0.87,0.66,DEPTH*0.66);
+      _instObj.updateMatrix();
+      mesh.setMatrixAt(idx,_instObj.matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.count = 0;
+    group.add(mesh);
+    return {mesh,ranks:items.map(item=>item.rank)};
+  });
+  group.userData = {total:slots.length,baseMesh,colorMeshes};
+  group.visible = false;
+  return group;
+}
+
 function setShellOpacity(mesh, opacity){
   if(!mesh || !mesh.material) return;
   const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
@@ -3406,8 +3496,9 @@ function setShellOpacity(mesh, opacity){
 }
 
 function applyWarehouseReveal(){
-  if(!warehouseShell) return;
   const progress = Math.max(0, Math.min(1, warehouseReveal));
+  applyWarehouseDemoFill(progress);
+  if(!warehouseShell){ scheduleRender(); return; }
   const roofT = shellEase((progress-0.02)/0.54);
   const wallT = shellEase((progress-0.28)/0.72);
   const roofParts = warehouseShell.userData.roofParts || [];
@@ -3503,6 +3594,7 @@ async function loadWarehouse(name){
 
   if(whGroup){ scene.remove(whGroup); disposeGroup(whGroup); }
   warehouseShell = null;
+  warehouseDemoPallets = null;
   pickables.length = 0;
   pickableTargets.length = 0;
   rackHoverTargets.length = 0;
@@ -3573,6 +3665,9 @@ async function loadWarehouse(name){
   });
 
   // Wersja techniczna: bez dokow/bram/pol odkladczych. Zostaja regaly i palety.
+
+  warehouseDemoPallets = buildWarehouseDemoPallets(name,whGroup);
+  if(warehouseDemoPallets) whGroup.add(warehouseDemoPallets);
 
   // Podłoga + siatka dopasowane do realnego bounding-boxa (regały + strefy).
   const bbox = new THREE.Box3().setFromObject(whGroup);
