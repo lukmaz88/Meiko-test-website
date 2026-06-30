@@ -21,17 +21,18 @@
       '<div class="mk-panel"></div><div class="mk-panel"></div><div class="mk-panel"></div>' +
       '<div class="mk-panel"></div><div class="mk-panel"></div></div>';
 
-    var word = 'MEIKO TRANS POLSKA';
-    var letters = '';
-    for (var i = 0; i < word.length; i++) {
-      var c = word.charAt(i);
-      if (c === ' ') {
-        letters += '<span' + (i === 11 ? ' class="mk-break-space"' : '') + ' style="width:.42em">&nbsp;</span>';
-        if (i === 11) letters += '<br class="mk-mobile-break">';
-        continue;
+    function loaderLine(text, offset) {
+      var html = '<span class="mk-title-group">';
+      for (var i = 0; i < text.length; i++) {
+        var c = text.charAt(i);
+        if (c === ' ') { html += '<span style="width:.42em">&nbsp;</span>'; continue; }
+        html += '<span style="animation-delay:' + (0.18 + (offset + i) * 0.045).toFixed(3) + 's">' + c + '</span>';
       }
-      letters += '<span style="animation-delay:' + (0.18 + i * 0.045).toFixed(3) + 's">' + c + '</span>';
+      return html + '</span>';
     }
+    var letters = loaderLine('MEIKO TRANS', 0) +
+      '<span class="mk-break-space" style="width:.42em">&nbsp;</span>' +
+      '<br class="mk-mobile-break">' + loaderLine('POLSKA', 12);
 
     el.innerHTML = panels +
       '<div class="mk-grid"></div>' +
