@@ -84,8 +84,9 @@
     document.body.appendChild(bar);
 
     var sections = [
-      ['top', 'Intro'], ['history', 'Historia'], ['services', 'Możliwości'],
-      ['digital', 'Digital'], ['experience', '3D'], ['contact', 'Kontakt']
+      ['top', 'Intro'], ['about', 'O firmie'], ['services', 'Usługi'],
+      ['warehouses', 'Magazyny'], ['standards', 'Standardy'],
+      ['experience', '3D'], ['contact', 'Kontakt']
     ].filter(function (s) { return document.getElementById(s[0]); });
 
     var rail = null, dots = [];
@@ -152,7 +153,8 @@
     if (reduce || !('IntersectionObserver' in window)) return;
     var heads = document.querySelectorAll(
       '.services h2,.digital h2,.experience h2,.network h2,.contact h2,' +
-      '.history-story h2,.section-lead h2'
+      '.history-story h2,.section-lead h2,.company-intro h2,' +
+      '.facts-heading h2,.standards-intro h2'
     );
     if (!heads.length) return;
     var io = new IntersectionObserver(function (entries) {
