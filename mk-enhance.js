@@ -86,7 +86,7 @@
     var sections = [
       ['top', 'Intro'], ['about', 'O firmie'], ['services', 'Usługi'],
       ['warehouses', 'Magazyny'], ['standards', 'Standardy'],
-      ['experience', '3D'], ['contact', 'Kontakt']
+      ['experience', 'Jak działamy'], ['contact', 'Kontakt']
     ].filter(function (s) { return document.getElementById(s[0]); });
 
     var rail = null, dots = [];

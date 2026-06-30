@@ -148,20 +148,6 @@
   }
   body.rendering #panel, body.rendering #legend, body.rendering #hint{display:none}
 
-  #filmBtn{position:fixed;top:18px;right:18px;z-index:18;padding:10px 15px;border:1px solid rgba(125,211,252,.45);
-           border-radius:10px;background:rgba(8,17,31,.90);color:#e8f7ff;font:700 12px/1.2 "Segoe UI",sans-serif;
-           cursor:pointer;box-shadow:0 12px 30px rgba(0,0,0,.32);backdrop-filter:blur(10px)}
-  #filmBtn:hover{background:#0f2d46;border-color:#7dd3fc}
-  #filmModal[hidden]{display:none}
-  #filmModal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
-             padding:28px;background:rgba(2,6,14,.88);backdrop-filter:blur(12px)}
-  #filmBox{position:relative;width:min(1100px,94vw);border:1px solid rgba(148,163,184,.32);border-radius:16px;
-           overflow:hidden;background:#05070b;box-shadow:0 28px 90px rgba(0,0,0,.68)}
-  #filmBox video{display:block;width:100%;max-height:86vh;background:#000}
-  #filmClose{position:absolute;top:12px;right:12px;z-index:2;width:38px;height:38px;border:1px solid rgba(255,255,255,.32);
-             border-radius:50%;background:rgba(3,7,18,.78);color:#fff;font-size:22px;line-height:34px;cursor:pointer}
-  @media(max-width:700px){#filmBtn{top:auto;right:12px;bottom:58px}#filmModal{padding:10px}}
-
 </style></head>
 <body>
   <div id="ui">
@@ -170,18 +156,6 @@
     </h1>
     <div class="sub"><b>Pojedynczy</b> regal -> korytarz -> <b>pary zlaczone plecami</b> -> korytarz -> ...
       Publiczny model konstrukcji regalow - bez danych, palet i dokumentow WMS.</div>
-  </div>
-
-
-  <button id="filmBtn" type="button" aria-haspopup="dialog">&#9654; Film Gaudi i Leon</button>
-  <div id="filmModal" role="dialog" aria-modal="true" aria-label="Film Gaudi i Leon" hidden>
-    <div id="filmBox">
-      <button id="filmClose" type="button" aria-label="Zamknij film">&times;</button>
-      <video id="warehouseFilm" controls playsinline preload="metadata">
-        <source src="film-gaudi-leon.mp4" type="video/mp4">
-        Twoja przegladarka nie obsluguje filmu MP4.
-      </video>
-    </div>
   </div>
 
   <div id="panel">
@@ -252,19 +226,6 @@
   <div id="vignette"></div>
   <div id="loading">Ladowanie sceny 3D... (budowa calego magazynu)</div>
 
-
-<script>
-(() => {
-  const modal = document.getElementById('filmModal');
-  const video = document.getElementById('warehouseFilm');
-  const open = () => { modal.hidden = false; video.play().catch(() => {}); };
-  const close = () => { video.pause(); modal.hidden = true; };
-  document.getElementById('filmBtn').addEventListener('click', open);
-  document.getElementById('filmClose').addEventListener('click', close);
-  modal.addEventListener('click', event => { if(event.target === modal) close(); });
-  document.addEventListener('keydown', event => { if(event.key === 'Escape' && !modal.hidden) close(); });
-})();
-</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
