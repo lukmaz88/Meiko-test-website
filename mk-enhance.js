@@ -376,7 +376,7 @@
     // Dzieki temu SVG na telefonie i komputerze nie rozjezdza sie w czasie.
     var runners = wrap.querySelectorAll('.mk-vehicle');
     var startedAt = performance.now();
-    var duration = 12000;
+    var duration = 14000;
 
     function smooth(value) {
       value = Math.max(0, Math.min(1, value));
@@ -397,10 +397,14 @@
     }
 
     function animate(now) {
-      var progress = ((now - startedAt) % duration) / duration;
+      var cycle = ((now - startedAt) % duration) / duration;
+      var travelEnd = .88;
+      var progress = cycle < travelEnd ? cycle / travelEnd : 1;
+      var resetHidden = cycle >= .98;
       var truckWeight = 0, shipWeight = 0, planeWeight = 0;
 
-      if (progress < .29) truckWeight = 1;
+      if (resetHidden) truckWeight = 1;
+      else if (progress < .29) truckWeight = 1;
       else if (progress < .34) {
         var toShip = smooth((progress - .29) / .05);
         truckWeight = 1 - toShip;
@@ -412,14 +416,18 @@
         planeWeight = toPlane;
       } else planeWeight = 1;
 
-      var envelope = progress < .025 ? smooth(progress / .025) :
-        (progress > .975 ? smooth((1 - progress) / .025) : 1);
+      var envelope;
+      if (cycle < .03) envelope = smooth(cycle / .03);
+      else if (cycle < .94) envelope = 1;
+      else if (cycle < .98) envelope = smooth((.98 - cycle) / .04);
+      else envelope = 0;
 
       runners.forEach(function (runner) {
         var x1 = Number(runner.getAttribute('data-x1'));
         var x2 = Number(runner.getAttribute('data-x2'));
         var y = Number(runner.getAttribute('data-y'));
-        runner.setAttribute('transform', 'translate(' + (x1 + (x2 - x1) * progress).toFixed(2) + ' ' + y + ')');
+        var position = resetHidden ? 0 : progress;
+        runner.setAttribute('transform', 'translate(' + (x1 + (x2 - x1) * position).toFixed(2) + ' ' + y + ')');
         runner.style.opacity = envelope.toFixed(3);
         setState(runner, truckWeight, shipWeight, planeWeight);
       });
