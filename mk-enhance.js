@@ -418,8 +418,8 @@
 
       var envelope;
       if (cycle < .03) envelope = smooth(cycle / .03);
-      else if (cycle < .94) envelope = 1;
-      else if (cycle < .98) envelope = smooth((.98 - cycle) / .04);
+      else if (cycle < .905) envelope = 1;
+      else if (cycle < .945) envelope = smooth((.945 - cycle) / .04);
       else envelope = 0;
 
       runners.forEach(function (runner) {
