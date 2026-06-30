@@ -547,7 +547,9 @@
         var rect = section.getBoundingClientRect();
         var vh = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1);
         // Pelna bryla, gdy sekcja wchodzi od dolu; same regaly, gdy sekcja jest juz w kadrze.
-        var reveal = (vh * 0.88 - rect.top) / (vh * 0.72);
+        // Keep the warehouse shell visible while the section first enters.
+        // The racks start revealing only after the viewer scrolls deeper in.
+        var reveal = (vh * 0.58 - rect.top) / (vh * 0.82);
         reveal = Math.max(0, Math.min(1, reveal));
         if (Math.abs(reveal - lastReveal) < 0.004) return;
         lastReveal = reveal;
