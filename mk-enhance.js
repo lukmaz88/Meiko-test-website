@@ -341,9 +341,9 @@
     var desktopSvg =
       '<svg class="mk-journey-desktop" viewBox="0 0 1200 150" role="img" aria-label="Trasa multimodalna: pojazd zmienia sie z ciezarowki w statek kontenerowy i samolot">' +
         '<defs><linearGradient id="mkWaterGradient" x1="0" y1="0" x2="0" y2="1">' +
-          '<stop offset="0" stop-color="#dff7ff"/>' +
-          '<stop offset=".5" stop-color="#8bd8ef" stop-opacity=".72"/>' +
-          '<stop offset="1" stop-color="#2695c4" stop-opacity=".42"/>' +
+          '<stop offset="0" stop-color="#eefbff" stop-opacity=".72"/>' +
+          '<stop offset=".5" stop-color="#8bd8ef" stop-opacity=".45"/>' +
+          '<stop offset="1" stop-color="#2695c4" stop-opacity=".25"/>' +
         '</linearGradient></defs>' +
         '<g class="mk-road-scene">' +
           '<path class="mk-road-bed" d="M60 100 H400"/>' +
@@ -457,9 +457,9 @@
 
       var cloudBreak = resetHidden ? 0 : smooth((progress - .83) / .07);
       if (cloudLeft && cloudRight) {
-        cloudLeft.style.transform = 'translate(' + (-18 * cloudBreak).toFixed(2) + 'px,' + (-7 * cloudBreak).toFixed(2) + 'px) rotate(' + (-9 * cloudBreak).toFixed(2) + 'deg)';
-        cloudRight.style.transform = 'translate(' + (18 * cloudBreak).toFixed(2) + 'px,' + (-7 * cloudBreak).toFixed(2) + 'px) rotate(' + (9 * cloudBreak).toFixed(2) + 'deg)';
-        cloudLeft.style.opacity = cloudRight.style.opacity = (1 - cloudBreak * .82).toFixed(3);
+        cloudLeft.style.transform = 'translate(' + (-10 * cloudBreak).toFixed(2) + 'px,' + (-4 * cloudBreak).toFixed(2) + 'px) rotate(' + (-5 * cloudBreak).toFixed(2) + 'deg)';
+        cloudRight.style.transform = 'translate(' + (10 * cloudBreak).toFixed(2) + 'px,' + (-4 * cloudBreak).toFixed(2) + 'px) rotate(' + (5 * cloudBreak).toFixed(2) + 'deg)';
+        cloudLeft.style.opacity = cloudRight.style.opacity = (1 - cloudBreak * .55).toFixed(3);
       }
 
       requestAnimationFrame(animate);
