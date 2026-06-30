@@ -666,6 +666,8 @@ let DOCKS_INFO = null;         // układ doków (do sceny załadunku: ciężaró
 let lastCorridorZ = [];        // osie alejek ostatniego magazynu (do re-spawnu agentów)
 let lastBaseBox = null;        // bbox regałów ostatniego magazynu (do re-spawnu agentów)
 let lastSceneBox = null;        // bbox całej sceny
+let warehouseShell = null;      // dach i sciany hali otaczajace regaly Gaudi
+let warehouseReveal = 1;        // 0 = pelna hala, 1 = same regaly
 let followAgent = null;
 let followAgentKey = null;
 let followAgentHint = null;
@@ -3387,6 +3389,112 @@ function addRackBox(g){
                                          topY:b.max.y, fall:null });
 }
 
+function shellEase(value){
+  const t = Math.max(0, Math.min(1, value));
+  return t*t*(3-2*t);
+}
+
+function setShellOpacity(mesh, opacity){
+  if(!mesh || !mesh.material) return;
+  const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+  mats.forEach(mat=>{
+    mat.transparent = true;
+    mat.opacity = Math.max(0, opacity);
+    mat.depthWrite = opacity > 0.55;
+  });
+  mesh.visible = opacity > 0.012;
+}
+
+function applyWarehouseReveal(){
+  if(!warehouseShell) return;
+  const progress = Math.max(0, Math.min(1, warehouseReveal));
+  const roofT = shellEase((progress-0.02)/0.54);
+  const wallT = shellEase((progress-0.28)/0.72);
+  const roofParts = warehouseShell.userData.roofParts || [];
+  const wallParts = warehouseShell.userData.wallParts || [];
+
+  roofParts.forEach(part=>{
+    part.mesh.position.copy(part.base).add(new THREE.Vector3(0, roofT*8.5, 0));
+    setShellOpacity(part.mesh, part.opacity*(1-roofT));
+  });
+  wallParts.forEach(part=>{
+    part.mesh.position.copy(part.base).add(new THREE.Vector3(part.dx*wallT*5.5, -wallT*1.8, part.dz*wallT*5.5));
+    setShellOpacity(part.mesh, part.opacity*(1-wallT));
+  });
+  warehouseShell.visible = progress < 0.999;
+  scheduleRender();
+}
+
+function buildWarehouseShell(name, bbox, cx, cz, spanX, spanZ){
+  if(name !== 'Gaudi') return null;
+  const shell = new THREE.Group();
+  shell.name = 'gaudiWarehouseShell';
+  shell.userData.roofParts = [];
+  shell.userData.wallParts = [];
+
+  const padding = 4.5;
+  const width = spanX + padding*2;
+  const depth = spanZ + padding*2;
+  const wallH = Math.max(10.5, bbox.max.y + 2.6);
+  const wallThickness = 0.38;
+  const roofMat = new THREE.MeshStandardMaterial({color:0xd9dee2,roughness:0.88,metalness:0.04,transparent:true,opacity:0.98,side:THREE.DoubleSide});
+  const wallMat = new THREE.MeshStandardMaterial({color:0xcbd2d8,roughness:0.9,metalness:0.03,transparent:true,opacity:0.98,side:THREE.DoubleSide});
+  const trimMat = new THREE.MeshStandardMaterial({color:0x8295a3,roughness:0.62,metalness:0.12,transparent:true,opacity:0.9});
+  const glassMat = new THREE.MeshStandardMaterial({color:0x8db5c8,emissive:0x244455,emissiveIntensity:0.18,roughness:0.32,metalness:0.18,transparent:true,opacity:0.72});
+
+  function roofPart(mesh, opacity){
+    shell.add(mesh);
+    shell.userData.roofParts.push({mesh,base:mesh.position.clone(),opacity});
+  }
+  function wallPart(mesh, dx, dz, opacity){
+    shell.add(mesh);
+    shell.userData.wallParts.push({mesh,base:mesh.position.clone(),dx,dz,opacity});
+  }
+
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(width,0.48,depth),roofMat);
+  roof.position.set(cx,wallH,cz);
+  roof.castShadow = true;
+  roofPart(roof,0.98);
+
+  const front = new THREE.Mesh(new THREE.BoxGeometry(width,wallH,wallThickness),wallMat);
+  front.position.set(cx,wallH/2,cz+depth/2);
+  wallPart(front,0,1,0.98);
+  const back = new THREE.Mesh(new THREE.BoxGeometry(width,wallH,wallThickness),wallMat.clone());
+  back.position.set(cx,wallH/2,cz-depth/2);
+  wallPart(back,0,-1,0.98);
+  const left = new THREE.Mesh(new THREE.BoxGeometry(wallThickness,wallH,depth),wallMat.clone());
+  left.position.set(cx-width/2,wallH/2,cz);
+  wallPart(left,-1,0,0.98);
+  const right = new THREE.Mesh(new THREE.BoxGeometry(wallThickness,wallH,depth),wallMat.clone());
+  right.position.set(cx+width/2,wallH/2,cz);
+  wallPart(right,1,0,0.98);
+
+  const baseTrim = new THREE.Mesh(new THREE.BoxGeometry(width+0.15,0.42,wallThickness+0.08),trimMat);
+  baseTrim.position.set(cx,0.34,cz+depth/2+0.02);
+  wallPart(baseTrim,0,1,0.9);
+
+  const lightRows = 4;
+  const lightsPerRow = 5;
+  for(let rz=0; rz<lightRows; rz++){
+    for(let rx=0; rx<lightsPerRow; rx++){
+      const skylight = new THREE.Mesh(new THREE.BoxGeometry(width*0.105,0.16,Math.max(1.2,depth*0.075)),glassMat.clone());
+      skylight.position.set(
+        cx-width*0.32 + rx*(width*0.16),
+        wallH+0.31,
+        cz-depth*0.29 + rz*(depth*0.19)
+      );
+      roofPart(skylight,0.72);
+    }
+  }
+  return shell;
+}
+
+window.setWarehouseReveal = value=>{
+  const next = Number(value);
+  warehouseReveal = Number.isFinite(next) ? Math.max(0,Math.min(1,next)) : warehouseReveal;
+  applyWarehouseReveal();
+};
+
 // Buduje (lub przebudowuje) zawartość wybranego magazynu logicznego.
 async function loadWarehouse(name){
   const whData = await ensureWarehouseData(name);
@@ -3394,6 +3502,7 @@ async function loadWarehouse(name){
   CUR = whData;
 
   if(whGroup){ scene.remove(whGroup); disposeGroup(whGroup); }
+  warehouseShell = null;
   pickables.length = 0;
   pickableTargets.length = 0;
   rackHoverTargets.length = 0;
@@ -3470,6 +3579,12 @@ async function loadWarehouse(name){
   const cx = (bbox.min.x + bbox.max.x)/2, cz = (bbox.min.z + bbox.max.z)/2;
   const spanX = bbox.max.x - bbox.min.x, spanZ = bbox.max.z - bbox.min.z;
   sceneTopY = bbox.max.y;          // górna krawędź sceny — kamera przelatuje NAD regałami
+
+  warehouseShell = buildWarehouseShell(name,bbox,cx,cz,spanX,spanZ);
+  if(warehouseShell){
+    whGroup.add(warehouseShell);
+    applyWarehouseReveal();
+  }
 
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(spanX+24, spanZ+24),

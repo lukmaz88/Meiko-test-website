@@ -541,6 +541,18 @@
       var r = cv.getBoundingClientRect();
       var cx = r.left + r.width / 2, cy = r.top + r.height * 0.5;
       var lastScroll = window.scrollY;
+      var lastReveal = -1;
+      function updateWarehouseReveal() {
+        if (!win3 || typeof win3.setWarehouseReveal !== 'function') return;
+        var rect = section.getBoundingClientRect();
+        var vh = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1);
+        // Pelna bryla, gdy sekcja wchodzi od dolu; same regaly, gdy sekcja jest juz w kadrze.
+        var reveal = (vh * 0.88 - rect.top) / (vh * 0.72);
+        reveal = Math.max(0, Math.min(1, reveal));
+        if (Math.abs(reveal - lastReveal) < 0.004) return;
+        lastReveal = reveal;
+        try { win3.setWarehouseReveal(reveal); } catch (e) {}
+      }
       function mev(type, x, b, pointer) {
         var C = pointer ? win3.PointerEvent : win3.MouseEvent;
         var init = { bubbles: true, cancelable: true, clientX: x, clientY: cy, button: 0, buttons: b, view: win3 };
@@ -553,7 +565,9 @@
         fire('pointermove', cx + dx, 1, true); fire('mousemove', cx + dx, 1, false);
         fire('pointerup', cx + dx, 0, true); fire('mouseup', cx + dx, 0, false);
       }
+      updateWarehouseReveal();
       orbitTimer = setInterval(function () {
+        updateWarehouseReveal();
         if (!inView) { lastScroll = window.scrollY; return; }
         // nie kreci gdy pelny ekran (uzytkownik steruje sam)
         if (shell.classList.contains('is-expanded')) return;
