@@ -340,6 +340,21 @@
 
     var desktopSvg =
       '<svg class="mk-journey-desktop" viewBox="0 0 1200 150" role="img" aria-label="Trasa multimodalna: pojazd zmienia sie z ciezarowki w statek kontenerowy i samolot">' +
+        '<g class="mk-road-scene">' +
+          '<path class="mk-road-bed" d="M60 100 H400"/>' +
+          '<path class="mk-road-dashes" d="M75 100 H390"/>' +
+        '</g>' +
+        '<g class="mk-water-scene">' +
+          '<rect class="mk-water-bed" x="400" y="88" width="400" height="24" rx="8"/>' +
+          '<path class="mk-wave mk-wave-a" d="M400 94 Q420 88 440 94 T480 94 T520 94 T560 94 T600 94 T640 94 T680 94 T720 94 T760 94 T800 94"/>' +
+          '<path class="mk-wave mk-wave-b" d="M400 104 Q420 98 440 104 T480 104 T520 104 T560 104 T600 104 T640 104 T680 104 T720 104 T760 104 T800 104"/>' +
+        '</g>' +
+        '<g class="mk-cloud-part mk-cloud-left">' +
+          '<path d="M925 92 C925 81 934 75 945 77 C947 64 959 59 970 67 L970 92 Z"/>' +
+        '</g>' +
+        '<g class="mk-cloud-part mk-cloud-right">' +
+          '<path d="M970 67 C980 61 992 68 993 78 C1005 77 1014 84 1014 92 L970 92 Z"/>' +
+        '</g>' +
         '<path id="mkRoute" class="mk-route" d="M60 100 L1140 100"/>' +
         '<circle class="mk-node" cx="200" cy="100" r="6"/>' +
         '<circle class="mk-node" cx="600" cy="100" r="6"/>' +
@@ -375,6 +390,8 @@
     // Jeden zegar steruje jednoczesnie pozycja i zmiana srodka transportu.
     // Dzieki temu SVG na telefonie i komputerze nie rozjezdza sie w czasie.
     var runners = wrap.querySelectorAll('.mk-vehicle');
+    var cloudLeft = wrap.querySelector('.mk-cloud-left');
+    var cloudRight = wrap.querySelector('.mk-cloud-right');
     var startedAt = performance.now();
     var duration = 14000;
 
@@ -431,6 +448,13 @@
         runner.style.opacity = envelope.toFixed(3);
         setState(runner, truckWeight, shipWeight, planeWeight);
       });
+
+      var cloudBreak = resetHidden ? 0 : smooth((progress - .83) / .07);
+      if (cloudLeft && cloudRight) {
+        cloudLeft.style.transform = 'translate(' + (-18 * cloudBreak).toFixed(2) + 'px,' + (-7 * cloudBreak).toFixed(2) + 'px) rotate(' + (-9 * cloudBreak).toFixed(2) + 'deg)';
+        cloudRight.style.transform = 'translate(' + (18 * cloudBreak).toFixed(2) + 'px,' + (-7 * cloudBreak).toFixed(2) + 'px) rotate(' + (9 * cloudBreak).toFixed(2) + 'deg)';
+        cloudLeft.style.opacity = cloudRight.style.opacity = (1 - cloudBreak * .82).toFixed(3);
+      }
 
       requestAnimationFrame(animate);
     }
