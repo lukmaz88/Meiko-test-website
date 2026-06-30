@@ -25,7 +25,11 @@
     var letters = '';
     for (var i = 0; i < word.length; i++) {
       var c = word.charAt(i);
-      if (c === ' ') { letters += '<span style="width:.42em">&nbsp;</span>'; continue; }
+      if (c === ' ') {
+        letters += '<span' + (i === 11 ? ' class="mk-break-space"' : '') + ' style="width:.42em">&nbsp;</span>';
+        if (i === 11) letters += '<br class="mk-mobile-break">';
+        continue;
+      }
       letters += '<span style="animation-delay:' + (0.18 + i * 0.045).toFixed(3) + 's">' + c + '</span>';
     }
 
