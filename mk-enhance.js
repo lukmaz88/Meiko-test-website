@@ -340,6 +340,11 @@
 
     var desktopSvg =
       '<svg class="mk-journey-desktop" viewBox="0 0 1200 150" role="img" aria-label="Trasa multimodalna: pojazd zmienia sie z ciezarowki w statek kontenerowy i samolot">' +
+        '<defs><linearGradient id="mkWaterGradient" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0" stop-color="#dff7ff"/>' +
+          '<stop offset=".5" stop-color="#8bd8ef" stop-opacity=".72"/>' +
+          '<stop offset="1" stop-color="#2695c4" stop-opacity=".42"/>' +
+        '</linearGradient></defs>' +
         '<g class="mk-road-scene">' +
           '<path class="mk-road-bed" d="M60 100 H400"/>' +
           '<path class="mk-road-dashes" d="M75 100 H390"/>' +
@@ -348,6 +353,7 @@
           '<rect class="mk-water-bed" x="400" y="88" width="400" height="24" rx="8"/>' +
           '<path class="mk-wave mk-wave-a" d="M400 94 Q420 88 440 94 T480 94 T520 94 T560 94 T600 94 T640 94 T680 94 T720 94 T760 94 T800 94"/>' +
           '<path class="mk-wave mk-wave-b" d="M400 104 Q420 98 440 104 T480 104 T520 104 T560 104 T600 104 T640 104 T680 104 T720 104 T760 104 T800 104"/>' +
+          '<path class="mk-wave mk-wave-c" d="M400 111 Q420 106 440 111 T480 111 T520 111 T560 111 T600 111 T640 111 T680 111 T720 111 T760 111 T800 111"/>' +
         '</g>' +
         '<g class="mk-cloud-part mk-cloud-left">' +
           '<path d="M925 92 C925 81 934 75 945 77 C947 64 959 59 970 67 L970 92 Z"/>' +
@@ -421,14 +427,14 @@
       var truckWeight = 0, shipWeight = 0, planeWeight = 0;
 
       if (resetHidden) truckWeight = 1;
-      else if (progress < .29) truckWeight = 1;
-      else if (progress < .34) {
-        var toShip = smooth((progress - .29) / .05);
+      else if (progress < .27) truckWeight = 1;
+      else if (progress < .36) {
+        var toShip = smooth((progress - .27) / .09);
         truckWeight = 1 - toShip;
         shipWeight = toShip;
-      } else if (progress < .66) shipWeight = 1;
-      else if (progress < .71) {
-        var toPlane = smooth((progress - .66) / .05);
+      } else if (progress < .63) shipWeight = 1;
+      else if (progress < .72) {
+        var toPlane = smooth((progress - .63) / .09);
         shipWeight = 1 - toPlane;
         planeWeight = toPlane;
       } else planeWeight = 1;
