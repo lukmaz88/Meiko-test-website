@@ -335,6 +335,13 @@
         '<path class="mk-fill" d="M34 22 L24 33 L42 22 Z"/>' +
       '</g></g>';
 
+    // Etykiety paska transportu — dwujezyczne (relabel na zywo przez mk-langchange)
+    var JT = {
+      pl: { road: 'TRANSPORT DROGOWY', rail: 'TRANSPORT KOLEJOWY', sea: 'TRANSPORT MORSKI', air: 'TRANSPORT LOTNICZY', roadS: 'DROGOWY', railS: 'KOLEJOWY', seaS: 'MORSKI', airS: 'LOTNICZY', cap: 'USŁUGI TRANSPORTOWE · DROGOWY → KOLEJOWY → MORSKI → LOTNICZY' },
+      en: { road: 'ROAD TRANSPORT', rail: 'RAIL TRANSPORT', sea: 'SEA TRANSPORT', air: 'AIR TRANSPORT', roadS: 'ROAD', railS: 'RAIL', seaS: 'SEA', airS: 'AIR', cap: 'TRANSPORT SERVICES · ROAD → RAIL → SEA → AIR' }
+    };
+    var JL = JT[MK_LANG] || JT.pl;
+
     var desktopSvg =
       '<svg class="mk-journey-desktop" viewBox="0 0 1200 150" role="img" aria-label="Trasa multimodalna: transport drogowy, kolejowy, morski i lotniczy">' +
         '<defs><linearGradient id="mkWaterGradient" x1="0" y1="0" x2="0" y2="1">' +
@@ -367,10 +374,10 @@
         '<circle class="mk-node" cx="465" cy="100" r="6"/>' +
         '<circle class="mk-node" cx="735" cy="100" r="6"/>' +
         '<circle class="mk-node" cx="1010" cy="100" r="6"/>' +
-        '<text class="mk-lbl" x="195" y="132">TRANSPORT DROGOWY</text>' +
-        '<text class="mk-lbl" x="465" y="132">TRANSPORT KOLEJOWY</text>' +
-        '<text class="mk-lbl" x="735" y="132">TRANSPORT MORSKI</text>' +
-        '<text class="mk-lbl" x="1010" y="132">TRANSPORT LOTNICZY</text>' +
+        '<text class="mk-lbl" data-k="road" x="195" y="132">' + JL.road + '</text>' +
+        '<text class="mk-lbl" data-k="rail" x="465" y="132">' + JL.rail + '</text>' +
+        '<text class="mk-lbl" data-k="sea" x="735" y="132">' + JL.sea + '</text>' +
+        '<text class="mk-lbl" data-k="air" x="1010" y="132">' + JL.air + '</text>' +
         '<g class="mk-vehicle" data-x1="60" data-x2="1140" data-y="100">' +
           truck + train + container + plane +
         '</g>' +
@@ -389,10 +396,10 @@
         '<circle class="mk-node" cx="145" cy="120" r="5"/>' +
         '<circle class="mk-node" cx="225" cy="120" r="5"/>' +
         '<circle class="mk-node" cx="305" cy="120" r="5"/>' +
-        '<text class="mk-lbl" x="65" y="166">DROGOWY</text>' +
-        '<text class="mk-lbl" x="145" y="166">KOLEJOWY</text>' +
-        '<text class="mk-lbl" x="225" y="166">MORSKI</text>' +
-        '<text class="mk-lbl" x="305" y="166">LOTNICZY</text>' +
+        '<text class="mk-lbl" data-k="roadS" x="65" y="166">' + JL.roadS + '</text>' +
+        '<text class="mk-lbl" data-k="railS" x="145" y="166">' + JL.railS + '</text>' +
+        '<text class="mk-lbl" data-k="seaS" x="225" y="166">' + JL.seaS + '</text>' +
+        '<text class="mk-lbl" data-k="airS" x="305" y="166">' + JL.airS + '</text>' +
         '<g class="mk-vehicle mk-mobile-runner" data-x1="30" data-x2="330" data-y="120">' +
           truck + train + container + plane +
         '</g>' +
@@ -400,8 +407,16 @@
 
     var wrap = document.createElement('div');
     wrap.className = 'mk-journey';
-    wrap.innerHTML = '<p class="mk-jcap">USŁUGI TRANSPORTOWE · DROGOWY → KOLEJOWY → MORSKI → LOTNICZY</p>' + desktopSvg + mobileSvg;
+    wrap.innerHTML = '<p class="mk-jcap">' + JL.cap + '</p>' + desktopSvg + mobileSvg;
     shell.insertBefore(wrap, list);
+
+    // Relabel etykiet transportu na zywo, gdy React zmieni jezyk
+    window.addEventListener('mk-langchange', function (e) {
+      var L = JT[e && e.detail === 'en' ? 'en' : 'pl'];
+      wrap.querySelectorAll('[data-k]').forEach(function (t) { t.textContent = L[t.getAttribute('data-k')]; });
+      var cap = wrap.querySelector('.mk-jcap');
+      if (cap) cap.textContent = L.cap;
+    });
 
     // Jeden zegar steruje jednoczesnie pozycja i zmiana srodka transportu.
     // Dzieki temu SVG na telefonie i komputerze nie rozjezdza sie w czasie.
