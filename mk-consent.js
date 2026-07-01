@@ -19,7 +19,7 @@
   var TXT = {
     pl: {
       title: 'Prywatność i pliki cookie',
-      body: 'Ta strona nie używa plików cookie ani narzędzi śledzących. Zapamiętujemy lokalnie wyłącznie Twój wybór języka (dane niezbędne). Czcionki dostarcza Google Fonts.',
+      body: 'Ta strona nie używa plików cookie ani narzędzi śledzących — bez analityki i reklam. Zapamiętujemy lokalnie wyłącznie Twój wybór języka (dane niezbędne).',
       accept: 'Akceptuję', settings: 'Ustawienia', save: 'Zapisz wybór', back: 'Wróć',
       panelTitle: 'Ustawienia prywatności',
       cats: [
@@ -31,7 +31,7 @@
     },
     en: {
       title: 'Privacy & cookies',
-      body: 'This website uses no cookies and no tracking tools. We only store your language choice locally (essential data). Fonts are provided by Google Fonts.',
+      body: 'This website uses no cookies and no tracking tools — no analytics, no ads. We only store your language choice locally (essential data).',
       accept: 'Accept', settings: 'Settings', save: 'Save choice', back: 'Back',
       panelTitle: 'Privacy settings',
       cats: [
