@@ -94,6 +94,7 @@
     var sections = [
       ['top', 'Intro', 'Intro'], ['about', 'O firmie', 'About'], ['services', 'Usługi', 'Services'],
       ['warehouses', 'Magazyny', 'Warehouses'], ['standards', 'Standardy', 'Standards'],
+      ['bridge', 'Cyfrowy most', 'Digital bridge'],
       ['experience', 'Jak działamy', 'How we work'], ['faq', 'FAQ', 'FAQ'], ['contact', 'Kontakt', 'Contact']
     ].filter(function (s) { return document.getElementById(s[0]); });
 
