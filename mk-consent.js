@@ -19,11 +19,12 @@
   var TXT = {
     pl: {
       title: 'Prywatność i pliki cookie',
-      body: 'Ta strona nie używa plików cookie ani narzędzi śledzących — bez analityki i reklam. Zapamiętujemy lokalnie wyłącznie Twój wybór języka (dane niezbędne).',
+      body: 'Ta strona nie używa plików cookie ani narzędzi śledzących — bez analityki i reklam. Zapamiętujemy lokalnie wyłącznie Twój wybór języka (dane niezbędne). Czcionki dostarcza Google Fonts.',
       accept: 'Akceptuję', settings: 'Ustawienia', save: 'Zapisz wybór', back: 'Wróć',
       panelTitle: 'Ustawienia prywatności',
       cats: [
         ['Niezbędne', 'Zapamiętanie języka i Twojego wyboru zgody. Zawsze aktywne.', true],
+        ['Czcionki (Google Fonts)', 'Fonty ładowane z serwerów Google w celu wyświetlenia strony — bez plików cookie i śledzenia.', true],
         ['Analityka', 'Nie używamy narzędzi analitycznych.', false],
         ['Marketing', 'Nie używamy plików cookie marketingowych.', false]
       ],
@@ -31,11 +32,12 @@
     },
     en: {
       title: 'Privacy & cookies',
-      body: 'This website uses no cookies and no tracking tools — no analytics, no ads. We only store your language choice locally (essential data).',
+      body: 'This website uses no cookies and no tracking tools — no analytics, no ads. We only store your language choice locally (essential data). Fonts are provided by Google Fonts.',
       accept: 'Accept', settings: 'Settings', save: 'Save choice', back: 'Back',
       panelTitle: 'Privacy settings',
       cats: [
         ['Essential', 'Remembers your language and consent choice. Always on.', true],
+        ['Fonts (Google Fonts)', 'Fonts loaded from Google servers to display the page — no cookies or tracking involved.', true],
         ['Analytics', 'We use no analytics tools.', false],
         ['Marketing', 'We use no marketing cookies.', false]
       ],
