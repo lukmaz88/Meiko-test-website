@@ -212,7 +212,7 @@ body::before{display:none !important}
 .experience.mk-wh .page-shell{pointer-events:none}
 .experience.mk-wh .experience-heading{position:relative;z-index:2}
 .experience.mk-wh .experience-heading h2,.experience.mk-wh .experience-heading > p:last-child{color:#fff!important}
-.experience .experience-heading h2{font-size:clamp(64px,8vw,118px)!important}
+.experience .experience-heading h2{font-size:clamp(64px,7.3vw,108px)!important;overflow-wrap:break-word}
 .experience.mk-wh .section-code{color:var(--mk-cyan)!important}
 .experience.mk-wh .data-note{display:none!important}
 .experience.mk-wh .warehouse-stage{position:absolute!important;inset:0!important;margin:0!important;z-index:0;opacity:0;transition:opacity 1.2s ease}
