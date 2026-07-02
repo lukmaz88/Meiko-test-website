@@ -5,3 +5,5 @@ To jest gotowa, produkcyjna paczka strony firmowej.
 Repozytorium jest publikowane przez GitHub Pages. Pliki źródłowe React znajdują się poza tym repozytorium, w `portfolio_react/`.
 
 Paczka zawiera publiczną wizualizację magazynu bez danych WMS, identyfikatorów klientów i dokumentów operacyjnych.
+
+<!-- redeploy: 2026-07-02 16:50 UTC -->
