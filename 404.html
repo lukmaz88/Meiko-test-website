@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#06111f" />
+    <title>404 — Meiko Trans Polska</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Manrope:wght@600;700&display=swap" />
+    <style>
+      :root { --navy: #06111f; --cyan: #3dd4ff; }
+      * { box-sizing: border-box; }
+      body { display: grid; place-items: center; min-height: 100vh; margin: 0; color: #fff; background: var(--navy); font-family: 'DM Sans', sans-serif; }
+      body::before { content: ''; position: fixed; inset: 0; opacity: .08; pointer-events: none; background-image: linear-gradient(rgba(255,255,255,.25) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.25) 1px, transparent 1px); background-size: 88px 88px; }
+      main { position: relative; max-width: 620px; padding: 40px 24px; text-align: center; }
+      .code { margin: 0 0 26px; color: var(--cyan); font: 700 10px 'Manrope', sans-serif; letter-spacing: .28em; }
+      h1 { position: relative; margin: 0; font: 600 clamp(96px, 22vw, 180px)/1 'Manrope', sans-serif; letter-spacing: -.03em; }
+      h1::after { content: ''; position: absolute; left: 50%; bottom: -18px; width: 56px; height: 2px; background: var(--cyan); transform: translateX(-50%); }
+      h2 { margin: 52px 0 0; font: 600 clamp(24px, 4.5vw, 34px)/1.15 'Manrope', sans-serif; letter-spacing: -.015em; }
+      p { max-width: 420px; margin: 18px auto 0; color: rgba(255,255,255,.55); font-size: 15px; line-height: 1.7; }
+      p em { font-style: normal; color: rgba(255,255,255,.38); font-size: 13px; }
+      a { display: inline-flex; align-items: center; gap: 26px; margin-top: 38px; padding: 16px 24px; color: var(--navy); background: var(--cyan); font: 700 12px 'Manrope', sans-serif; letter-spacing: .04em; text-decoration: none; }
+      a span { font-size: 17px; transition: transform .2s; }
+      a:hover span { transform: translateX(4px); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="code">MEIKO TRANS POLSKA · GLIWICE</p>
+      <h1>404</h1>
+      <h2>Ta strona zjechała z trasy.</h2>
+      <p>Adres nie istnieje albo został przeniesiony.<br /><em>The page you are looking for does not exist or has been moved.</em></p>
+      <a id="home" href="/">Strona główna / Home page <span>→</span></a>
+    </main>
+    <script>
+      // Works on both the GitHub Pages project path and the target domain root
+      var root = location.pathname.indexOf('/Meiko-test-website') === 0 ? '/Meiko-test-website/' : '/';
+      document.getElementById('home').setAttribute('href', root);
+    </script>
+  </body>
+</html>
