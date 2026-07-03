@@ -629,6 +629,8 @@ let lastBaseBox = null;        // bbox regałów ostatniego magazynu (do re-spaw
 let lastSceneBox = null;        // bbox całej sceny
 let warehouseShell = null;      // dach i sciany hali otaczajace regaly Gaudi
 let warehouseReveal = 1;        // 0 = pelna hala, 1 = same regaly
+let forkliftFleet = null;       // 4 wozki widlowe krazace po alejce obwodowej (Gaudi)
+let canvasInView = true;        // czy canvas jest w kadrze — animacja wozkow tylko wtedy
 let warehouseDemoPallets = null; // lekkie instancje wypelniajace regaly podczas scrollowania
 let followAgent = null;
 let followAgentKey = null;
@@ -733,7 +735,8 @@ function hasTopplingRacks(){
 function needsContinuousRender(){
   const falling = (typeof hasTopplingRacks === 'function' && hasTopplingRacks())
     || (typeof hasFreePalletsAwake === 'function' && hasFreePalletsAwake());
-  return !!(flyAnim || focusedBox || falling);
+  const forklifts = typeof forkliftsRunning === 'function' && forkliftsRunning();
+  return !!(flyAnim || focusedBox || falling || forklifts);
 }
 function frameDt(now){
   const safeNow = now || performance.now();
@@ -747,6 +750,7 @@ function renderFrame(now){
   updatePulse(ft.now);
   if(typeof updateRacks === 'function') updateRacks(ft.dt);
   if(typeof updateFreePallets === 'function') updateFreePallets(ft.dt);
+  if(typeof updateForklifts === 'function') updateForklifts(ft.dt);
   if(controls){
     controls.update();
   }
@@ -3333,6 +3337,15 @@ function buildScene(){
   addEventListener('resize', onResize);
   renderer.domElement.addEventListener('pointermove', onMove);
   controls.addEventListener('change', scheduleRender);
+
+  // Animacja wozkow tylko gdy canvas faktycznie w kadrze — brak renderu poza ekranem.
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(entries=>{
+      canvasInView = !!(entries[0] && entries[0].isIntersecting);
+      scheduleRender();
+    }, {threshold: 0.02}).observe(renderer.domElement);
+  }
+  document.addEventListener('visibilitychange', scheduleRender);
 }
 
 // Zwalnia geometrie/materiały poprzedniego magazynu, by nie zostawiać wycieków pamięci GPU.
@@ -3542,6 +3555,104 @@ function buildWarehouseShell(name, bbox, cx, cz, spanX, spanZ){
   return shell;
 }
 
+/* ---- Wozki widlowe: 4 niskopoligonowe pojazdy krazace po alejkach obwodowych (tylko Gaudi).
+   Animacja dziala wylacznie, gdy canvas jest w kadrze i karta widoczna — zero kosztu poza ekranem. ---- */
+function makeLoopPath(cx, cz, halfW, halfD, r){
+  const w = Math.max(0.1, halfW - r), d = Math.max(0.1, halfD - r);
+  const q = Math.PI*r/2;
+  const segs = [
+    {len:2*w, point:s=>[cx - w + s, cz - halfD]},
+    {len:q,   point:s=>{const a=-Math.PI/2 + s/r; return [cx + w + Math.cos(a)*r, cz - d + Math.sin(a)*r];}},
+    {len:2*d, point:s=>[cx + halfW, cz - d + s]},
+    {len:q,   point:s=>{const a=s/r; return [cx + w + Math.cos(a)*r, cz + d + Math.sin(a)*r];}},
+    {len:2*w, point:s=>[cx + w - s, cz + halfD]},
+    {len:q,   point:s=>{const a=Math.PI/2 + s/r; return [cx - w + Math.cos(a)*r, cz + d + Math.sin(a)*r];}},
+    {len:2*d, point:s=>[cx - halfW, cz + d - s]},
+    {len:q,   point:s=>{const a=Math.PI + s/r; return [cx - w + Math.cos(a)*r, cz - d + Math.sin(a)*r];}},
+  ];
+  let total = 0;
+  segs.forEach(sg=>{ sg.start = total; total += sg.len; });
+  return {
+    total,
+    at(dist){
+      const t = ((dist % total) + total) % total;
+      const sg = segs.find(s=> t < s.start + s.len) || segs[segs.length-1];
+      return sg.point(t - sg.start);
+    }
+  };
+}
+
+function buildForkliftMesh(shared){
+  const g = new THREE.Group();
+  const add = (geo, mat, x, y, z, rz)=>{
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    if(rz) m.rotation.z = rz;
+    g.add(m);
+    return m;
+  };
+  [[-0.5,0.55],[0.5,0.55],[-0.5,-0.62],[0.5,-0.62]].forEach(([x,z])=> add(shared.wheelGeo, shared.darkMat, x, 0.27, z, Math.PI/2));
+  add(shared.bodyGeo, shared.orangeMat, 0, 0.72, -0.18);
+  add(shared.weightGeo, shared.orangeMat, 0, 0.6, -0.95);
+  add(shared.seatGeo, shared.darkMat, 0, 1.12, -0.42);
+  [[-0.42,0.12],[0.42,0.12],[-0.42,-0.78],[0.42,-0.78]].forEach(([x,z])=> add(shared.postGeo, shared.greyMat, x, 1.62, z));
+  add(shared.roofGeo, shared.darkMat, 0, 2.16, -0.33);
+  add(shared.mastGeo, shared.greyMat, -0.3, 1.2, 0.62);
+  add(shared.mastGeo, shared.greyMat, 0.3, 1.2, 0.62);
+  add(shared.crossGeo, shared.greyMat, 0, 2.05, 0.62);
+  add(shared.forkGeo, shared.darkMat, -0.24, 0.12, 1.2);
+  add(shared.forkGeo, shared.darkMat, 0.24, 0.12, 1.2);
+  add(shared.beaconGeo, shared.beaconMat, 0, 2.25, -0.33);
+  return g;
+}
+
+function buildForkliftFleet(name, bbox, cx, cz, spanX, spanZ){
+  if(name !== 'Gaudi') return null;
+  const shared = {
+    wheelGeo: new THREE.CylinderGeometry(0.27, 0.27, 0.2, 10),
+    bodyGeo: new THREE.BoxGeometry(1.0, 0.62, 1.35),
+    weightGeo: new THREE.BoxGeometry(0.92, 0.5, 0.5),
+    seatGeo: new THREE.BoxGeometry(0.46, 0.5, 0.14),
+    postGeo: new THREE.BoxGeometry(0.07, 1.1, 0.07),
+    roofGeo: new THREE.BoxGeometry(0.98, 0.06, 1.08),
+    mastGeo: new THREE.BoxGeometry(0.09, 2.1, 0.09),
+    crossGeo: new THREE.BoxGeometry(0.72, 0.09, 0.09),
+    forkGeo: new THREE.BoxGeometry(0.13, 0.06, 1.05),
+    beaconGeo: new THREE.CylinderGeometry(0.07, 0.09, 0.12, 8),
+    orangeMat: new THREE.MeshStandardMaterial({color:0xe07f2a, roughness:0.55, metalness:0.15}),
+    darkMat: new THREE.MeshStandardMaterial({color:0x272c33, roughness:0.85, metalness:0.1}),
+    greyMat: new THREE.MeshStandardMaterial({color:0x99a3ac, roughness:0.5, metalness:0.35}),
+    beaconMat: new THREE.MeshStandardMaterial({color:0xffc63d, emissive:0xcf8f14, emissiveIntensity:0.8, roughness:0.4}),
+  };
+  const group = new THREE.Group();
+  group.name = 'forkliftFleet';
+  const outer = makeLoopPath(cx, cz, spanX/2 + 3.0, spanZ/2 + 3.0, 2.4);
+  const inner = makeLoopPath(cx, cz, spanX/2 + 1.5, spanZ/2 + 1.5, 1.8);
+  const units = [
+    { path: outer, dist: 0,                 dir: 1,  speed: 3.1 },
+    { path: outer, dist: outer.total*0.5,   dir: 1,  speed: 3.1 },
+    { path: inner, dist: inner.total*0.25,  dir: -1, speed: 2.5 },
+    { path: inner, dist: inner.total*0.75,  dir: -1, speed: 2.5 },
+  ];
+  units.forEach(u=>{ u.mesh = buildForkliftMesh(shared); group.add(u.mesh); });
+  return { group, units };
+}
+
+function forkliftsRunning(){
+  return !!(forkliftFleet && forkliftFleet.group.visible && canvasInView && !document.hidden);
+}
+
+function updateForklifts(dt){
+  if(!forkliftsRunning() || !(dt > 0)) return;
+  forkliftFleet.units.forEach(u=>{
+    u.dist += u.speed * u.dir * dt;
+    const p = u.path.at(u.dist);
+    const p2 = u.path.at(u.dist + 0.4*u.dir);
+    u.mesh.position.set(p[0], 0, p[1]);
+    u.mesh.rotation.y = Math.atan2(p2[0]-p[0], p2[1]-p[1]);
+  });
+}
+
 window.setWarehouseReveal = value=>{
   const next = Number(value);
   warehouseReveal = Number.isFinite(next) ? Math.max(0,Math.min(1,next)) : warehouseReveal;
@@ -3556,6 +3667,7 @@ async function loadWarehouse(name){
 
   if(whGroup){ scene.remove(whGroup); disposeGroup(whGroup); }
   warehouseShell = null;
+  forkliftFleet = null;
   warehouseDemoPallets = null;
   pickables.length = 0;
   pickableTargets.length = 0;
@@ -3642,6 +3754,9 @@ async function loadWarehouse(name){
     whGroup.add(warehouseShell);
     applyWarehouseReveal();
   }
+
+  forkliftFleet = buildForkliftFleet(name,bbox,cx,cz,spanX,spanZ);
+  if(forkliftFleet) whGroup.add(forkliftFleet.group);
 
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(spanX+24, spanZ+24),
