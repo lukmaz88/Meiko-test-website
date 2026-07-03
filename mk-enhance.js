@@ -92,10 +92,10 @@
 
     // [id, label PL, label EN]
     var sections = [
-      ['top', 'Intro', 'Intro'], ['about', 'O firmie', 'About'], ['services', 'Usługi', 'Services'],
-      ['warehouses', 'Magazyny', 'Warehouses'], ['standards', 'Standardy', 'Standards'],
-      ['bridge', 'Cyfrowy most', 'Digital bridge'],
-      ['experience', 'Jak działamy', 'How we work'], ['faq', 'FAQ', 'FAQ'], ['contact', 'Kontakt', 'Contact']
+      ['top', 'Intro', 'Intro'], ['about', 'O firmie', 'About'], ['history', 'Historia', 'History'],
+      ['services', 'Usługi', 'Services'], ['warehouses', 'Magazyny', 'Warehouses'], ['standards', 'Standardy', 'Standards'],
+      ['bridge', 'Cyfrowy most', 'Digital bridge'], ['experience', 'Jak działamy', 'How we work'],
+      ['network', 'Sieć globalna', 'Global network'], ['faq', 'FAQ', 'FAQ'], ['contact', 'Kontakt', 'Contact']
     ].filter(function (s) { return document.getElementById(s[0]); });
 
     var rail = null, dots = [];
