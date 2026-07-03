@@ -3461,7 +3461,8 @@ function applyWarehouseReveal(){
   applyWarehouseDemoFill(progress);
   if(!warehouseShell){ scheduleRender(); return; }
   const roofT = shellEase((progress-0.02)/0.54);
-  const wallT = shellEase((progress-0.28)/0.72);
+  // Sciany startuja pozniej niz dach, ale odslaniaja sie szybciej (koniec ~0.82 postepu)
+  const wallT = shellEase((progress-0.46)/0.36);
   const roofParts = warehouseShell.userData.roofParts || [];
   const wallParts = warehouseShell.userData.wallParts || [];
 
