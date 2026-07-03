@@ -629,7 +629,7 @@ let lastBaseBox = null;        // bbox regałów ostatniego magazynu (do re-spaw
 let lastSceneBox = null;        // bbox całej sceny
 let warehouseShell = null;      // dach i sciany hali otaczajace regaly Gaudi
 let warehouseReveal = 1;        // 0 = pelna hala, 1 = same regaly
-let forkliftFleet = null;       // 4 wozki widlowe krazace po alejce obwodowej (Gaudi)
+let forkliftFleet = null;       // 4 wozki obwodowe + 3 reach trucki w regalach (Gaudi)
 let canvasInView = true;        // czy canvas jest w kadrze — animacja wozkow tylko wtedy
 let warehouseDemoPallets = null; // lekkie instancje wypelniajace regaly podczas scrollowania
 let followAgent = null;
@@ -3606,17 +3606,66 @@ function buildForkliftMesh(shared){
   return g;
 }
 
-function buildForkliftFleet(name, bbox, cx, cz, spanX, spanZ){
+// Reach truck w tej samej lekkiej, niskopoligonowej stylistyce co wozki obwodowe.
+// Wyzszy maszt, nogi podporowe i ruchoma karetka odrozniaja go od wozka czolowego.
+function buildHighBayForkliftMesh(shared){
+  const g = new THREE.Group();
+  const add = (geo, mat, x, y, z, rz)=>{
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x,y,z);
+    if(rz) m.rotation.z = rz;
+    g.add(m);
+    return m;
+  };
+  [[-0.46,0.34],[0.46,0.34],[-0.46,-0.54],[0.46,-0.54]].forEach(([x,z])=>
+    add(shared.wheelGeo,shared.darkMat,x,0.25,z,Math.PI/2));
+  add(shared.reachBodyGeo,shared.orangeMat,0,0.68,-0.2);
+  add(shared.reachWeightGeo,shared.orangeMat,0,0.58,-0.82);
+  add(shared.seatGeo,shared.darkMat,0,1.08,-0.4);
+  [[-0.4,-0.02],[0.4,-0.02],[-0.4,-0.72],[0.4,-0.72]].forEach(([x,z])=>
+    add(shared.postGeo,shared.greyMat,x,1.58,z));
+  add(shared.reachRoofGeo,shared.darkMat,0,2.08,-0.36);
+  add(shared.legGeo,shared.orangeMat,-0.39,0.18,0.78);
+  add(shared.legGeo,shared.orangeMat,0.39,0.18,0.78);
+  add(shared.legWheelGeo,shared.darkMat,-0.39,0.2,1.14,Math.PI/2);
+  add(shared.legWheelGeo,shared.darkMat,0.39,0.2,1.14,Math.PI/2);
+  add(shared.tallMastGeo,shared.greyMat,-0.31,2.06,0.59);
+  add(shared.tallMastGeo,shared.greyMat,0.31,2.06,0.59);
+  add(shared.tallCrossGeo,shared.greyMat,0,3.96,0.59);
+  const carriage = new THREE.Group();
+  carriage.position.y = 0.12;
+  const cross = new THREE.Mesh(shared.carriageGeo,shared.darkMat);
+  cross.position.set(0,0.54,0.65); carriage.add(cross);
+  [-0.24,0.24].forEach(x=>{
+    const fork = new THREE.Mesh(shared.forkGeo,shared.darkMat);
+    fork.position.set(x,0.14,1.2); carriage.add(fork);
+  });
+  g.add(carriage);
+  const beacon = add(shared.beaconGeo,shared.beaconMat,0,2.18,-0.36);
+  g.userData.carriage = carriage;
+  g.userData.beacon = beacon;
+  return g;
+}
+
+function buildForkliftFleet(name, bbox, cx, cz, spanX, spanZ, corridorZ, baseBox){
   if(name !== 'Gaudi') return null;
   const shared = {
     wheelGeo: new THREE.CylinderGeometry(0.27, 0.27, 0.2, 10),
+    legWheelGeo: new THREE.CylinderGeometry(0.18, 0.18, 0.16, 10),
     bodyGeo: new THREE.BoxGeometry(1.0, 0.62, 1.35),
     weightGeo: new THREE.BoxGeometry(0.92, 0.5, 0.5),
+    reachBodyGeo: new THREE.BoxGeometry(0.92, 0.58, 1.12),
+    reachWeightGeo: new THREE.BoxGeometry(0.84, 0.46, 0.46),
     seatGeo: new THREE.BoxGeometry(0.46, 0.5, 0.14),
     postGeo: new THREE.BoxGeometry(0.07, 1.1, 0.07),
     roofGeo: new THREE.BoxGeometry(0.98, 0.06, 1.08),
+    reachRoofGeo: new THREE.BoxGeometry(0.92, 0.06, 0.96),
+    legGeo: new THREE.BoxGeometry(0.13, 0.14, 1.34),
     mastGeo: new THREE.BoxGeometry(0.09, 2.1, 0.09),
+    tallMastGeo: new THREE.BoxGeometry(0.085, 3.78, 0.085),
     crossGeo: new THREE.BoxGeometry(0.72, 0.09, 0.09),
+    tallCrossGeo: new THREE.BoxGeometry(0.72, 0.09, 0.09),
+    carriageGeo: new THREE.BoxGeometry(0.7, 0.1, 0.1),
     forkGeo: new THREE.BoxGeometry(0.13, 0.06, 1.05),
     beaconGeo: new THREE.CylinderGeometry(0.07, 0.09, 0.12, 8),
     orangeMat: new THREE.MeshStandardMaterial({color:0xe07f2a, roughness:0.55, metalness:0.15}),
@@ -3629,12 +3678,47 @@ function buildForkliftFleet(name, bbox, cx, cz, spanX, spanZ){
   const outer = makeLoopPath(cx, cz, spanX/2 + 3.0, spanZ/2 + 3.0, 2.4);
   const inner = makeLoopPath(cx, cz, spanX/2 + 1.5, spanZ/2 + 1.5, 1.8);
   const units = [
-    { path: outer, dist: 0,                 dir: 1,  speed: 3.1 },
-    { path: outer, dist: outer.total*0.5,   dir: 1,  speed: 3.1 },
-    { path: inner, dist: inner.total*0.25,  dir: -1, speed: 2.5 },
-    { path: inner, dist: inner.total*0.75,  dir: -1, speed: 2.5 },
+    { kind:'perimeter', path:outer, dist:0,                 dir:1,  speed:3.1 },
+    { kind:'perimeter', path:outer, dist:outer.total*0.5,   dir:1,  speed:3.1 },
+    { kind:'perimeter', path:inner, dist:inner.total*0.25,  dir:-1, speed:2.5 },
+    { kind:'perimeter', path:inner, dist:inner.total*0.75,  dir:-1, speed:2.5 },
   ];
   units.forEach(u=>{ u.mesh = buildForkliftMesh(shared); group.add(u.mesh); });
+
+  // Trzy osobne alejki oznaczaja brak spotkan czolowych i brak koniecznosci omijania.
+  // Filtr kolizji usuwa alejke, jezeli przecina ja nietypowo ustawiony regal.
+  if(baseBox && !baseBox.isEmpty() && corridorZ && corridorZ.length){
+    const halfWidth = 0.63;
+    const xMin = baseBox.min.x + 1.9;
+    const xMax = baseBox.max.x - 1.9;
+    const safeLanes = corridorZ.filter(z=>!rackBoxes.some(b=>
+      z+halfWidth>b.minZ && z-halfWidth<b.maxZ &&
+      xMax>b.minX-0.2 && xMin<b.maxX+0.2
+    ));
+    const picked = [];
+    const preferred = [0.22,0.5,0.78];
+    preferred.forEach(f=>{
+      const idx = Math.round((safeLanes.length-1)*f);
+      if(idx>=0 && !picked.includes(idx)) picked.push(idx);
+    });
+    for(let i=0; picked.length<Math.min(3,safeLanes.length) && i<safeLanes.length; i++){
+      if(!picked.includes(i)) picked.push(i);
+    }
+    const fractions = [0.2,0.54,0.82];
+    const speeds = [1.7,1.9,1.6];
+    picked.slice(0,3).forEach((laneIndex,i)=>{
+      const u = {
+        kind:'highbay', z:safeLanes[laneIndex], xMin, xMax,
+        x:xMin+(xMax-xMin)*fractions[i], dir:i===1?-1:1,
+        speed:speeds[i], pause:0, pauseDur:1, trip:i
+      };
+      u.mesh = buildHighBayForkliftMesh(shared);
+      u.mesh.position.set(u.x,0,u.z);
+      u.mesh.rotation.y = u.dir>0 ? Math.PI/2 : -Math.PI/2;
+      group.add(u.mesh);
+      units.push(u);
+    });
+  }
   return { group, units };
 }
 
@@ -3645,6 +3729,28 @@ function forkliftsRunning(){
 function updateForklifts(dt){
   if(!forkliftsRunning() || !(dt > 0)) return;
   forkliftFleet.units.forEach(u=>{
+    if(u.kind==='highbay'){
+      const carriage = u.mesh.userData.carriage;
+      if(u.pause>0){
+        u.pause = Math.max(0,u.pause-dt);
+        const k = 1-u.pause/u.pauseDur;
+        if(carriage) carriage.position.y = 0.12+2.05*Math.sin(Math.PI*Math.min(1,k));
+      } else {
+        if(carriage) carriage.position.y = 0.12;
+        u.x += u.dir*u.speed*dt;
+        if(u.x>=u.xMax || u.x<=u.xMin){
+          u.x = Math.max(u.xMin,Math.min(u.xMax,u.x));
+          u.dir *= -1;
+          u.trip += 1;
+          u.pause = u.pauseDur = 1.25+(u.trip%3)*0.25;
+        }
+        u.mesh.position.set(u.x,0,u.z);
+        u.mesh.rotation.y = u.dir>0 ? Math.PI/2 : -Math.PI/2;
+      }
+      const beacon = u.mesh.userData.beacon;
+      if(beacon) beacon.material.emissiveIntensity = 0.45+0.55*(0.5+0.5*Math.sin(performance.now()*0.009+u.z));
+      return;
+    }
     u.dist += u.speed * u.dir * dt;
     const p = u.path.at(u.dist);
     const p2 = u.path.at(u.dist + 0.4*u.dir);
@@ -3755,7 +3861,7 @@ async function loadWarehouse(name){
     applyWarehouseReveal();
   }
 
-  forkliftFleet = buildForkliftFleet(name,bbox,cx,cz,spanX,spanZ);
+  forkliftFleet = buildForkliftFleet(name,bbox,cx,cz,spanX,spanZ,corridorZ,baseBox);
   if(forkliftFleet) whGroup.add(forkliftFleet.group);
 
   const floor = new THREE.Mesh(
