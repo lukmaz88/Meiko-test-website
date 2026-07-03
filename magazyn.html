@@ -3686,15 +3686,12 @@ function buildForkliftFleet(name, bbox, cx, cz, spanX, spanZ, corridorZ, baseBox
   units.forEach(u=>{ u.mesh = buildForkliftMesh(shared); group.add(u.mesh); });
 
   // Trzy osobne alejki oznaczaja brak spotkan czolowych i brak koniecznosci omijania.
-  // Filtr kolizji usuwa alejke, jezeli przecina ja nietypowo ustawiony regal.
+  // corridorZ powstaje pomiedzy faktycznymi grupami regalow, wiec kazda z tych osi
+  // jest z definicji wolnym korytarzem. Gaudi nie ma prostopadlych overrides.
   if(baseBox && !baseBox.isEmpty() && corridorZ && corridorZ.length){
-    const halfWidth = 0.63;
     const xMin = baseBox.min.x + 1.9;
     const xMax = baseBox.max.x - 1.9;
-    const safeLanes = corridorZ.filter(z=>!rackBoxes.some(b=>
-      z+halfWidth>b.minZ && z-halfWidth<b.maxZ &&
-      xMax>b.minX-0.2 && xMin<b.maxX+0.2
-    ));
+    const safeLanes = corridorZ.slice();
     const picked = [];
     const preferred = [0.22,0.5,0.78];
     preferred.forEach(f=>{
@@ -3713,12 +3710,16 @@ function buildForkliftFleet(name, bbox, cx, cz, spanX, spanZ, corridorZ, baseBox
         speed:speeds[i], pause:0, pauseDur:1, trip:i
       };
       u.mesh = buildHighBayForkliftMesh(shared);
+      u.mesh.name = `highBayForklift${i+1}`;
+      u.mesh.scale.setScalar(1.22);
       u.mesh.position.set(u.x,0,u.z);
       u.mesh.rotation.y = u.dir>0 ? Math.PI/2 : -Math.PI/2;
       group.add(u.mesh);
       units.push(u);
     });
   }
+  group.userData.perimeterCount = units.filter(u=>u.kind==='perimeter').length;
+  group.userData.highBayCount = units.filter(u=>u.kind==='highbay').length;
   return { group, units };
 }
 
