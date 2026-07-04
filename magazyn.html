@@ -3735,7 +3735,7 @@ function updateForklifts(dt){
       if(u.pause>0){
         u.pause = Math.max(0,u.pause-dt);
         const k = 1-u.pause/u.pauseDur;
-        if(carriage) carriage.position.y = 0.12+2.05*Math.sin(Math.PI*Math.min(1,k));
+        if(carriage) carriage.position.y = 0.12+3.1*Math.sin(Math.PI*Math.min(1,k));
       } else {
         if(carriage) carriage.position.y = 0.12;
         u.x += u.dir*u.speed*dt;
@@ -3743,7 +3743,7 @@ function updateForklifts(dt){
           u.x = Math.max(u.xMin,Math.min(u.xMax,u.x));
           u.dir *= -1;
           u.trip += 1;
-          u.pause = u.pauseDur = 1.25+(u.trip%3)*0.25;
+          u.pause = u.pauseDur = 2.6+(u.trip%3)*0.5;
         }
         u.mesh.position.set(u.x,0,u.z);
         u.mesh.rotation.y = u.dir>0 ? Math.PI/2 : -Math.PI/2;
@@ -3759,6 +3759,11 @@ function updateForklifts(dt){
     u.mesh.rotation.y = Math.atan2(p2[0]-p[0], p2[1]-p[1]);
   });
 }
+
+// Diagnostyka floty (konsola): pozycje wozkow wysokiego skladu i wysokosc karetki.
+window.__forkliftDebug = ()=> forkliftFleet ? forkliftFleet.units.map(u=> u.kind==='highbay'
+  ? {kind:'highbay', x:+u.x.toFixed(1), z:+u.z.toFixed(1), lift:+u.mesh.userData.carriage.position.y.toFixed(2), paused:u.pause>0}
+  : {kind:'perimeter'}) : null;
 
 window.setWarehouseReveal = value=>{
   const next = Number(value);
