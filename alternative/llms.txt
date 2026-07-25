@@ -1,0 +1,29 @@
+# Meiko Trans Polska
+
+Official website concept for Meiko Trans Polska, a B2B logistics operator based in Gliwice, Poland.
+
+Core capabilities:
+- Warehousing and value-added services
+- Road and rail transport
+- Air freight
+- Ocean freight
+- In-house customs services
+- Supply-chain and warehouse consulting
+
+Key verified facts:
+- Meiko Group history begins in Nagoya in 1949
+- Operations in Poland since 2005
+- Two operating warehouses in Gliwice
+- 21,980 m² of current operating warehouse space
+- Four freight modes
+- AEO and ISO 9001:2015 frameworks
+
+Main contact:
+Meiko Trans Polska Sp. z o.o.
+ul. Leona Wyczółkowskiego 121
+44-109 Gliwice, Poland
+tel. +48 32 777 38 80
+kontakt@meikotrans.com.pl
+
+Languages: Polish and English
+Canonical: https://lukmaz88.github.io/Meiko-test-website/alternative/

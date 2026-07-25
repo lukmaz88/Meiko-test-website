@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lukmaz88.github.io/Meiko-test-website/alternative/sitemap.xml

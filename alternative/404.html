@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>404 · Meiko Trans Polska</title>
+    <style>
+      :root { color-scheme: dark; font-family: Arial, sans-serif; }
+      * { box-sizing: border-box; }
+      body { display: grid; min-height: 100vh; margin: 0; place-items: center; background: #06111f; color: white; }
+      main { width: min(700px, calc(100vw - 40px)); padding: 60px; border: 1px solid rgba(255,255,255,.2); }
+      span { color: #3dd4ff; font-size: .75rem; letter-spacing: .15em; }
+      h1 { margin: 28px 0 18px; font-size: clamp(3rem, 10vw, 7rem); line-height: .9; }
+      p { max-width: 430px; color: rgba(255,255,255,.66); line-height: 1.7; }
+      a { display: inline-block; margin-top: 24px; padding-bottom: 7px; border-bottom: 1px solid #3dd4ff; color: #3dd4ff; text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span>404 / ROUTE NOT FOUND</span>
+      <h1>Ten kierunek nie istnieje.</h1>
+      <p>Wróć do głównego przepływu Meiko Trans Polska.</p>
+      <a id="home" href="./">Strona główna →</a>
+    </main>
+    <script>
+      if (location.hostname.endsWith('github.io')) {
+        document.getElementById('home').href = '/' + location.pathname.split('/').filter(Boolean)[0] + '/';
+      }
+    </script>
+  </body>
+</html>
+
